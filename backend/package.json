@@ -1,0 +1,42 @@
+{
+  "name": "mkulima-exchange-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Mkulima Exchange - Connecting Kenyan farmers directly to buyers",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "node prisma/seed.js",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
+  "keywords": [
+    "agriculture",
+    "farming",
+    "ecommerce",
+    "Kenya",
+    "M-Pesa"
+  ],
+  "author": "Collins Kithinji",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.1.2",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "cloudinary": "^1.40.0",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.1",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - represents both farmers and buyers
+model User {
+  id            String     @id @default(cuid())
+  phone         String     @unique
+  fullName      String
+  email         String?    @unique
+  password      String?    // Password hash
+  role          Role       @default(BUYER)
+  avatar        String?    // Cloudinary URL
+  bio           String?
+  location      String?    // County/city
+  
+  // Profile fields
+  farmName      String?    // For farmers
+  farmSize      Float?     // In acres
+  verified      Boolean    @default(false)
+  verifiedAt    DateTime?
+  
+  // Relationships
+  farmListing   Listing[]
+  buyerOrders   Order[]    @relation("buyer")
+  farmerOrders  Order[]    @relation("farmer")
+  reviews       Review[]   @relation("reviewer")
+  reviewsReceived Review[] @relation("reviewee")
+  
+  // Metadata
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([phone])
+  @@index([role])
+}
+
+enum Role {
+  FARMER
+  BUYER
+  ADMIN
+}
+
+// Product Listing
+model Listing {
+  id            String     @id @default(cuid())
+  farmer        User       @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  farmerId      String
+  
+  name          String     // e.g., "Fresh Tomatoes"
+  description   String?
+  cropType      String     // e.g., "Vegetables", "Fruits", "Grains"
+  quantity      Float      // In kg
+  unit          String     @default("kg")
+  pricePerUnit  Float      // In KES
+  images        String[]   // Cloudinary URLs
+  
+  available     Boolean    @default(true)
+  county        String     // Where the produce is located
+  subCounty     String?
+  latitude      Float?
+  longitude     Float?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  // Relationships
+  orders        Order[]
+
+  @@index([farmerId])
+  @@index([cropType])
+  @@index([county])
+  @@index([available])
+}
+
+// Order model
+model Order {
+  id            String     @id @default(cuid())
+  buyer         User       @relation("buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId       String
+  
+  listing       Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId     String
+  
+  farmer        User       @relation("farmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmerId      String
+  
+  quantity      Float
+  negotiatedPrice Float?   // If negotiated
+  totalPrice    Float      // Final price to pay
+  
+  status        OrderStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  
+  deliveryDate  DateTime?
+  deliveredAt   DateTime?
+  
+  notes         String?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  // Payment relationship
+  payment       Payment?
+
+  @@index([buyerId])
+  @@index([farmerId])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  NEGOTIATING
+  CONFIRMED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  IN_ESCROW
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+// Payment model (M-Pesa transactions)
+model Payment {
+  id            String     @id @default(cuid())
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId       String     @unique
+  
+  amount        Float      // In KES
+  mpesaCode     String?    // M-Pesa transaction code
+  
+  status        PaymentStatus @default(PENDING)
+  
+  buyerPhone    String
+  farmerPhone   String
+  
+  initiatedAt   DateTime   @default(now())
+  completedAt   DateTime?
+  
+  metadata      Json?      // Store Daraja API response
+
+  @@index([status])
+  @@index([mpesaCode])
+}
+
+// Review & Rating
+model Review {
+  id            String     @id @default(cuid())
+  reviewer      User       @relation("reviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewerId    String
+  
+  reviewee      User       @relation("reviewee", fields: [revieweeId], references: [id], onDelete: Cascade)
+  revieweeId    String
+  
+  rating        Int        // 1-5 stars
+  comment       String?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([reviewerId, revieweeId])
+  @@index([revieweeId])
+}
+
+// Cart model (for future frontend)
+model Cart {
+  id            String     @id @default(cuid())
+  userId        String     // Not a FK for flexibility
+  items         Json       // Store as JSON array
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([userId])
+}
