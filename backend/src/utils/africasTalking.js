@@ -11,17 +11,18 @@ export async function sendOTPSMS(phoneNumber, otp) {
   try {
     const message = `Your Mkulima Exchange verification code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
 
+    // Create form-encoded body
+    const params = new URLSearchParams();
+    params.append('username', process.env.AFRICASTALKING_USERNAME);
+    params.append('message', message);
+    params.append('to', phoneNumber);
+
     const response = await axios.post(
       AFRICASTALKING_API_URL,
-      {
-        username: process.env.AFRICASTALKING_USERNAME,
-        message: message,
-        to: phoneNumber,
-      },
+      params,
       {
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
           apiKey: process.env.AFRICASTALKING_API_KEY,
         },
       }
@@ -68,17 +69,18 @@ export async function sendOTPSMS(phoneNumber, otp) {
  */
 export async function sendSMS(phoneNumber, message) {
   try {
+    // Create form-encoded body
+    const params = new URLSearchParams();
+    params.append('username', process.env.AFRICASTALKING_USERNAME);
+    params.append('message', message);
+    params.append('to', phoneNumber);
+
     const response = await axios.post(
       AFRICASTALKING_API_URL,
-      {
-        username: process.env.AFRICASTALKING_USERNAME,
-        message: message,
-        to: phoneNumber,
-      },
+      params,
       {
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
           apiKey: process.env.AFRICASTALKING_API_KEY,
         },
       }
