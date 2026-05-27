@@ -16,7 +16,7 @@ export async function sendOTPSMS(phoneNumber, otp) {
       {
         username: process.env.AFRICASTALKING_USERNAME,
         message: message,
-        recipients: [phoneNumber],
+        to: phoneNumber,
       },
       {
         headers: {
@@ -73,7 +73,7 @@ export async function sendSMS(phoneNumber, message) {
       {
         username: process.env.AFRICASTALKING_USERNAME,
         message: message,
-        recipients: [phoneNumber],
+        to: phoneNumber,
       },
       {
         headers: {
