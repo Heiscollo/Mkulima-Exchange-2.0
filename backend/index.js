@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import authRoutes from './src/routes/authRoutes.js';
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Import routes
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 // app.use('/api/listings', listingRoutes);
 // app.use('/api/orders', orderRoutes);
 // app.use('/api/payments', paymentRoutes);
