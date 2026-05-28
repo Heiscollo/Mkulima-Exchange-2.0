@@ -128,7 +128,7 @@ model User {
   phone           String        @unique
   name            String
   role            UserRole      @default(BUYER)
-  county          County
+  county          County?
   mpesaNumber     String?       @unique
   isVerified      Boolean       @default(false)
 

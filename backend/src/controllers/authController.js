@@ -90,21 +90,17 @@ export const verifyOTP = async (req, res) => {
     }
 
     // Find OTP record
-    const otpRecord = await prisma.otpCode.findUnique({
-      where: { phone: normalizedPhone },
+    const otpRecord = await prisma.otpCode.findFirst({
+      where: {
+        phone: normalizedPhone,
+        expiresAt: {
+          gt: new Date()
+        }
+      }
     });
 
     if (!otpRecord) {
       return res.status(400).json({ error: 'OTP not found or expired' });
-    }
-
-    // Check expiry
-    if (isOTPExpired(otpRecord.expiresAt)) {
-      // Delete expired OTP
-      await prisma.otpCode.delete({
-        where: { phone: normalizedPhone },
-      });
-      return res.status(400).json({ error: 'OTP has expired' });
     }
 
     // Compare OTP with hash
@@ -116,7 +112,7 @@ export const verifyOTP = async (req, res) => {
 
     // Delete OTP after successful verification
     await prisma.otpCode.delete({
-      where: { phone: normalizedPhone },
+      where: { id: otpRecord.id },
     });
 
     // Find or create user
