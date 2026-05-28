@@ -54,13 +54,11 @@ export const createListing = async (req, res) => {
 
     // Upload images to Cloudinary
     const imageUrls = [];
-    const imagePublicIds = [];
 
     for (const file of files) {
       const uploadResult = await uploadImage(file.path, 'listings');
       if (uploadResult.success) {
         imageUrls.push(uploadResult.url);
-        imagePublicIds.push(uploadResult.publicId);
       } else {
         return res.status(500).json({
           error: 'Failed to upload image: ' + uploadResult.error,
@@ -81,7 +79,6 @@ export const createListing = async (req, res) => {
         description: description || '',
         availableDate: new Date(available_date),
         images: imageUrls,
-        imagePublicIds: imagePublicIds,
         status: 'ACTIVE',
       },
       include: {
