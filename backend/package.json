@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.7.1",
+    "africastalking": "^0.7.9",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.40.0",

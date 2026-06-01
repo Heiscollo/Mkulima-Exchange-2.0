@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './src/routes/authRoutes.js';
 import listingRoutes from './src/routes/listingRoutes.js';
+import orderRoutes from './src/routes/orderRoutes.js';
+import { checkExpiredOrders } from './src/controllers/orderController.js';
 
 dotenv.config();
 
@@ -25,7 +27,7 @@ app.get('/api/health', (req, res) => {
 // Import routes
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
-// app.use('/api/orders', orderRoutes);
+app.use('/api/orders', orderRoutes);
 // app.use('/api/payments', paymentRoutes);
 // app.use('/api/reviews', reviewRoutes);
 // app.use('/api/admin', adminRoutes);
@@ -44,9 +46,21 @@ app.use((req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🌱 Mkulima Exchange API running on http://localhost:${PORT}`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
+
+  // Check expired orders on startup
+  console.log('Checking for expired orders on startup...');
+  await checkExpiredOrders();
+
+  // Schedule checkExpiredOrders to run every hour
+  setInterval(async () => {
+    console.log('Running scheduled check for expired orders...');
+    await checkExpiredOrders();
+  }, 60 * 60 * 1000); // Every hour
+
+  console.log('✓ Expired orders check scheduled to run every hour');
 });
 
 // Graceful shutdown

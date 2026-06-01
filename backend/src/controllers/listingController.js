@@ -19,6 +19,7 @@ export const createListing = async (req, res) => {
       county,
       description,
       available_date,
+      minimum_order_quantity,
     } = req.body;
     const userId = req.user.userId;
     const files = req.files || [];
@@ -52,6 +53,22 @@ export const createListing = async (req, res) => {
       });
     }
 
+    // Validate minimum order quantity if provided
+    let minimumOrderQty = null;
+    if (minimum_order_quantity) {
+      minimumOrderQty = parseFloat(minimum_order_quantity);
+      if (isNaN(minimumOrderQty) || minimumOrderQty <= 0) {
+        return res.status(400).json({
+          error: 'Minimum order quantity must be a positive number',
+        });
+      }
+      if (minimumOrderQty > quantityNum) {
+        return res.status(400).json({
+          error: 'Minimum order quantity must be less than or equal to listing quantity',
+        });
+      }
+    }
+
     // Upload images to Cloudinary
     const imageUrls = [];
 
@@ -75,6 +92,7 @@ export const createListing = async (req, res) => {
         quantity: quantityNum,
         unit: unit,
         pricePerUnit: priceNum,
+        minimumOrderQuantity: minimumOrderQty,
         county: county,
         description: description || '',
         availableDate: new Date(available_date),

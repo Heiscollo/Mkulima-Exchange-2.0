@@ -202,6 +202,7 @@ model Listing {
   quantity        Float
   unit            Unit
   pricePerUnit    Float
+  minimumOrderQuantity Float?
   county          County
   description     String?
   availableDate   DateTime
@@ -234,6 +235,10 @@ model Order {
   quantity        Float
   totalPrice      Float
   offeredPrice    Float?
+  counterRound    Int           @default(0)
+  expiresAt       DateTime?
+  farmerConfirmed Boolean       @default(false)
+  buyerConfirmed  Boolean       @default(false)
   status          OrderStatus   @default(PENDING)
   
   payment         Payment?
@@ -246,6 +251,7 @@ model Order {
   @@index([farmerId])
   @@index([listingId])
   @@index([status])
+  @@index([expiresAt])
 }
 
 // Payment model (M-Pesa transactions)
