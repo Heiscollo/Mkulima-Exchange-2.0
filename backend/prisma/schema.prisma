@@ -254,7 +254,9 @@ model Order {
   @@index([expiresAt])
 }
 
-// Payment model (M-Pesa transactions)
+// Payment model (M-Pesa transactions - ESCROW SYSTEM)
+// Money is held after buyer pays (HELD status)
+// Only released to farmer after both parties confirm delivery (RELEASED status)
 model Payment {
   id                    String        @id @default(cuid())
   order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -263,7 +265,15 @@ model Payment {
   mpesaTransactionId    String?       @unique
   amount                Float
   status                PaymentStatus @default(PENDING)
+  
+  // Payer and receiver phone numbers for SMS notifications
   payerPhone            String
+  farmerPhone           String?
+  
+  // Delivery confirmation flags for escrow release
+  buyerConfirmed        Boolean       @default(false)
+  farmerConfirmed       Boolean       @default(false)
+  
   paidAt                DateTime?
 
   createdAt             DateTime      @default(now())

@@ -48,6 +48,102 @@ export const sendOrderAcceptedNotification = async (buyerPhone, farmerName, quan
   return sendSMS(buyerPhone, message);
 };
 
+// ============================================================================
+// ESCROW PAYMENT SYSTEM - SMS NOTIFICATIONS IN SWAHILI
+// These SMS messages guide users through the payment and delivery confirmation
+// ============================================================================
+
+/**
+ * Payment received and held in escrow
+ * Sent to FARMER after buyer pays successfully
+ */
+export const sendPaymentHeldToFarmer = async (farmerPhone, farmerName, amount, cropName) => {
+  const message = `Habari ${farmerName}! Mnunuzi amelipa KES ${amount} kwa ${cropName} yako. Pesa imehifadhiwa salama. Tuma mazao ili kupokea malipo yako. - Mkulima Exchange`;
+  console.log(`📩 [FARMER] Payment held notification: ${farmerPhone}`);
+  return sendSMS(farmerPhone, message);
+};
+
+/**
+ * Payment received successfully
+ * Sent to BUYER after M-Pesa confirms payment
+ */
+export const sendPaymentSuccessTobuyer = async (buyerPhone, amount, mpesaReceiptNumber) => {
+  const message = `Malipo ya KES ${amount} yamefanikiwa. Nambari ya risiti: ${mpesaReceiptNumber}. Subiri mkulima atume mazao yako. - Mkulima Exchange`;
+  console.log(`📩 [BUYER] Payment success notification: ${buyerPhone}`);
+  return sendSMS(buyerPhone, message);
+};
+
+/**
+ * Payment failed
+ * Sent to BUYER if M-Pesa transaction fails
+ */
+export const sendPaymentFailureTobuyer = async (buyerPhone) => {
+  const message = `Malipo hayakufanikiwa. Tafadhali jaribu tena. - Mkulima Exchange`;
+  console.log(`📩 [BUYER] Payment failure notification: ${buyerPhone}`);
+  return sendSMS(buyerPhone, message);
+};
+
+/**
+ * Buyer confirmed delivery
+ * Sent to FARMER after buyer confirms they received goods
+ * Farmer needs to also confirm to release payment
+ */
+export const sendBuyerConfirmedDeliveryToFarmer = async (farmerPhone) => {
+  const message = `Mnunuzi amethibitisha kupokea mazao. Thibitisha wewe pia ili kupokea malipo yako. - Mkulima Exchange`;
+  console.log(`📩 [FARMER] Buyer delivery confirmation: ${farmerPhone}`);
+  return sendSMS(farmerPhone, message);
+};
+
+/**
+ * Farmer confirmed delivery
+ * Sent to BUYER after farmer confirms they sent goods
+ */
+export const sendFarmerConfirmedDeliveryTobuyer = async (buyerPhone) => {
+  const message = `Mkulima amethibitisha kutuma mazao. - Mkulima Exchange`;
+  console.log(`📩 [BUYER] Farmer delivery confirmation: ${buyerPhone}`);
+  return sendSMS(buyerPhone, message);
+};
+
+/**
+ * Payment released to farmer
+ * Sent to FARMER after both parties confirm delivery (escrow released)
+ */
+export const sendPaymentReleasedToFarmer = async (farmerPhone, farmerName, amount, mpesaNumber) => {
+  const message = `Hongera ${farmerName}! KES ${amount} imetumwa kwenye M-Pesa yako ${mpesaNumber}. Asante kwa kutumia Mkulima Exchange! - Mkulima Exchange`;
+  console.log(`📩 [FARMER] Payment released notification: ${farmerPhone}`);
+  return sendSMS(farmerPhone, message);
+};
+
+/**
+ * Order completed
+ * Sent to BUYER after escrow is released and delivery is confirmed
+ */
+export const sendOrderCompletedTobuyer = async (buyerPhone) => {
+  const message = `Manunuzi yamekamilika. Asante kwa kutumia Mkulima Exchange! Tafadhali acha ukaguzi kwa mkulima. - Mkulima Exchange`;
+  console.log(`📩 [BUYER] Order completed notification: ${buyerPhone}`);
+  return sendSMS(buyerPhone, message);
+};
+
+/**
+ * Payment refunded
+ * Sent to BUYER when admin refunds a disputed payment
+ */
+export const sendPaymentRefundedTobuyer = async (buyerPhone, amount) => {
+  const message = `Malipo yako ya KES ${amount} yatarudishwa ndani ya siku 3-5. Pole kwa usumbufu. - Mkulima Exchange`;
+  console.log(`📩 [BUYER] Payment refunded notification: ${buyerPhone}`);
+  return sendSMS(buyerPhone, message);
+};
+
+/**
+ * Dispute reported
+ * Sent to FARMER when a dispute is filed (payment refunded)
+ */
+export const sendDisputeReportedToFarmer = async (farmerPhone) => {
+  const message = `Agizo limeripotiwa. Timu yetu itawasiliana nawe hivi karibuni. - Mkulima Exchange`;
+  console.log(`📩 [FARMER] Dispute reported notification: ${farmerPhone}`);
+  return sendSMS(farmerPhone, message);
+};
+
 /**
  * Send order rejected notification to buyer in Swahili
  */
