@@ -173,7 +173,13 @@ export const getOrderById = async (req, res) => {
         buyer: true,
         farmer: true,
         payment: true,
-        review: true,
+        reviews: {
+          include: {
+            reviewer: { select: { id: true, name: true, role: true } },
+            reviewed: { select: { id: true, name: true, role: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 

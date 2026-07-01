@@ -1,9 +1,17 @@
 import express from 'express';
+import { authenticateToken, requireAdmin } from '../middleware/authMiddleware.js';
+import {
+  getDisputes,
+  getStats,
+  resolveDisputedOrder,
+} from '../controllers/adminController.js';
 
 const router = express.Router();
 
-// GET /api/admin/stats - Platform statistics (admin only)
-// GET /api/admin/disputes - Get disputes (admin only)
-// POST /api/admin/disputes/:id/resolve - Resolve a dispute
+router.use(authenticateToken, requireAdmin);
+
+router.get('/disputes', getDisputes);
+router.patch('/orders/:id/resolve', resolveDisputedOrder);
+router.get('/stats', getStats);
 
 export default router;

@@ -80,57 +80,71 @@ export function Profile() {
           <div className="col-span-1 space-y-4">
             <div className="rounded-[32px] bg-gradient-sunset p-8 text-white shadow-lg shadow-[#F7971E]/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-pattern-kikoy opacity-15" />
-              <div className="relative z-10">
-                <p className="text-sm font-bold tracking-wider uppercase text-white/80">{t('profile.completedOrders')}</p>
-                <h3 className="mt-1 text-4xl font-black tracking-tighter">42</h3>
-                <p className="mt-4 text-sm font-medium text-white/90">{t('profile.completedDesc')}</p>
-              </div>
-            </div>
-            <div className="rounded-[32px] bg-white border border-[#F4ECE1] p-8 text-[#2B1612] shadow-sm">
-              <p className="text-sm font-bold tracking-wider uppercase text-[#2B1612]/50">{t('profile.wallet')}</p>
-              <h3 className="mt-1 text-4xl font-black tracking-tighter text-[#008D41]">KSh 0</h3>
-              <button className="mt-4 w-full rounded-xl bg-[#F4ECE1] py-3 text-sm font-bold hover:bg-[#008D41] hover:text-white transition-all">
-                {t('profile.topUp')}
-              </button>
-            </div>
-          </div>
+              import React, { useEffect, useState } from 'react';
+              import { Edit2, MapPin, ShieldCheck, Star, UserRound } from 'lucide-react';
+              import { useNavigate } from 'react-router-dom';
+              import { useAuth } from '../contexts/AuthContext';
+              import { userApi, type UserProfile } from '../services/api';
+              import { formatDate, trustBadgeForTransactions } from '../utils/marketplace';
+              import { notifyError } from '../utils/notify';
 
-          {/* Menu Items */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="overflow-hidden rounded-[32px] bg-white shadow-sm border border-[#F4ECE1]">
-              <div className="divide-y divide-[#F4ECE1]">
-                {menuItems.map((item, index) => (
-                  <Link 
-                    key={index}
-                    to={item.path} 
-                    className="flex items-center justify-between p-6 hover:bg-[#FDFBF7] transition-colors group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.bg} ${item.color} group-hover:scale-110 transition-transform`}>
-                        <item.icon size={24} />
+              export function Profile() {
+                const { user } = useAuth();
+                const navigate = useNavigate();
+                const [profile, setProfile] = useState<UserProfile | null>(null);
+
+                useEffect(() => {
+                  const fetchProfile = async () => {
+                    try {
+                      const response = await userApi.getCurrentProfile();
+                      setProfile(response.user);
+                    } catch {
+                      notifyError('Could not load profile', 'Tafadhali jaribu tena.');
+                    }
+                  };
+
+                  fetchProfile();
+                }, []);
+
+                const summary = profile || user;
+                const trust = trustBadgeForTransactions(profile?.completedTransactions || 0);
+
+                return (
+                  <div className="w-full min-h-screen bg-[#FDFBF7] pb-24">
+                    <div className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8">
+                      <div className="rounded-[36px] border border-[#F4ECE1] bg-white p-8 shadow-xl shadow-[#008D41]/5 md:p-12">
+                        <div className="flex flex-col gap-8 md:flex-row md:items-start">
+                          <div className="flex h-28 w-28 items-center justify-center rounded-[32px] bg-gradient-kenya text-4xl font-black text-white shadow-lg">
+                            {summary?.name?.slice(0, 1)?.toUpperCase() || <UserRound size={44} />}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                              <div>
+                                <h1 className="text-4xl font-black tracking-tight text-[#2B1612]">{summary?.name || 'Your profile'}</h1>
+                                <p className="mt-2 flex items-center gap-2 text-lg font-medium text-[#2B1612]/60"><MapPin size={18} className="text-[#E32636]" /> {summary?.county || 'Kenya'}</p>
+                              </div>
+                              <div className="inline-flex items-center gap-2 rounded-full bg-[#008D41]/10 px-4 py-2 text-sm font-black text-[#008D41]">
+                                <ShieldCheck size={16} /> {trust.label}
+                              </div>
+                            </div>
+
+                            <p className="mt-6 max-w-2xl text-[#2B1612]/80">{summary?.bio || 'Update your bio to tell buyers about your farm, delivery area, and produce quality.'}</p>
+
+                            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                              <div className="rounded-[24px] border border-[#F4ECE1] bg-[#FDFBF7] p-5"><div className="text-3xl font-black text-[#008D41]">{profile?.averageRating?.toFixed?.(1) || '0.0'}</div><div className="mt-1 text-sm font-medium text-[#2B1612]/60">Average rating</div></div>
+                              <div className="rounded-[24px] border border-[#F4ECE1] bg-[#FDFBF7] p-5"><div className="text-3xl font-black text-[#E32636]">{profile?.reviewCount || 0}</div><div className="mt-1 text-sm font-medium text-[#2B1612]/60">Reviews</div></div>
+                              <div className="rounded-[24px] border border-[#F4ECE1] bg-[#FDFBF7] p-5"><div className="text-3xl font-black text-[#F7971E]">{profile?.completedTransactions || 0}</div><div className="mt-1 text-sm font-medium text-[#2B1612]/60">Transactions</div></div>
+                              <div className="rounded-[24px] border border-[#F4ECE1] bg-[#FDFBF7] p-5"><div className="text-3xl font-black text-[#008D41]">{formatDate(profile?.createdAt || new Date().toISOString())}</div><div className="mt-1 text-sm font-medium text-[#2B1612]/60">Member since</div></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-10 flex flex-wrap gap-4">
+                          <button onClick={() => navigate('/edit-profile')} className="inline-flex items-center gap-2 rounded-2xl bg-gradient-kenya px-6 py-3 font-black text-white shadow-lg shadow-[#008D41]/20"><Edit2 size={16} /> Edit profile</button>
+                          <button onClick={() => navigate('/orders')} className="rounded-2xl border border-[#F4ECE1] bg-white px-6 py-3 font-black text-[#2B1612]">View orders</button>
+                        </div>
                       </div>
-                      <span className="text-lg font-bold text-[#2B1612] group-hover:text-[#008D41] transition-colors">{item.label}</span>
                     </div>
-                    <ChevronRight size={20} className="text-[#2B1612]/30 group-hover:text-[#008D41] group-hover:translate-x-1 transition-all" />
-                  </Link>
-                ))}
-                
-                <button 
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-between p-6 hover:bg-red-50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 group-hover:scale-110 transition-transform">
-                      <LogOut size={24} />
-                    </div>
-                    <span className="text-lg font-bold text-red-600">{t('profile.logout')}</span>
                   </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+                );
+              }

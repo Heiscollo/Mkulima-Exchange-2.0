@@ -109,6 +109,7 @@ enum OrderStatus {
   DELIVERED
   COMPLETED
   DISPUTED
+  REFUNDED
 }
 
 enum PaymentStatus {
@@ -242,7 +243,11 @@ model Order {
   status          OrderStatus   @default(PENDING)
   
   payment         Payment?
-  review          Review?
+  // Each completed order can produce two independent reviews: one from the
+  // buyer and one from the farmer. Reputation should therefore be bilateral,
+  // not collapsed into a single row, because the trust signal protects both
+  // sides of the market from opaque counterparties.
+  reviews         Review[]
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -293,7 +298,7 @@ model Review {
   reviewedId      String
   
   order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId         String        @unique
+  orderId         String
   
   rating          Int
   comment         String?
@@ -301,7 +306,10 @@ model Review {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  @@unique([reviewerId, reviewedId, orderId])
+  // A reviewer may leave exactly one review per order. This preserves the
+  // integrity of reputation data by preventing duplicate feedback while still
+  // allowing both parties in the same transaction to rate each other.
+  @@unique([reviewerId, orderId])
   @@index([reviewedId])
   @@index([orderId])
 }

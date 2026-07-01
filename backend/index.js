@@ -7,6 +7,9 @@ import authRoutes from './src/routes/authRoutes.js';
 import listingRoutes from './src/routes/listingRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
+import reviewRoutes from './src/routes/reviewRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
 import { checkExpiredOrders } from './src/controllers/orderController.js';
 
 dotenv.config();
@@ -30,8 +33,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
-// app.use('/api/reviews', reviewRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
