@@ -1,3 +1,6 @@
+
+
+
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   authApi,
@@ -5,7 +8,6 @@ import {
   getAuthToken,
   setAuthToken,
   type AuthUser,
-  type County,
   type RegisterDetailsRequest,
   type UpdateProfileRequest,
 } from '../services/api';
@@ -99,8 +101,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (typeof value === 'string' && typeof otp === 'string') {
       const result = await authApi.verifyOtp({ phone: value, otp });
-      setAuthToken(result.token);
-      persistUser(result.user as User);
+      if (result.isNewUser) {
+        clearAuthToken();
+        persistUser(null);
+        localStorage.setItem('pending_phone', result.phone || value);
+      } else if (result.token && result.user) {
+        setAuthToken(result.token);
+        persistUser(result.user as User);
+        localStorage.removeItem('pending_phone');
+      }
       return result;
     }
 
@@ -121,7 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const registerDetails = async (payload: RegisterDetailsRequest) => {
     const result = await authApi.registerDetails(payload);
-    await refreshUser();
+    setAuthToken(result.token);
+    persistUser(result.user as User);
+    localStorage.removeItem('pending_phone');
     return result.user as User;
   };
 

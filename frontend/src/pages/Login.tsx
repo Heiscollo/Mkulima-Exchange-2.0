@@ -43,9 +43,9 @@ export function Login() {
 
     try {
       const response = await login(phone, otp);
-      const user = response?.user;
-      if (user?.name === 'Pending' || !user?.isVerified) {
-        navigate('/register', { state: { phone } });
+      if (response?.isNewUser || !response?.user?.name || response?.user?.name === 'Pending' || !response?.user?.role) {
+        localStorage.setItem('pending_phone', response?.phone || phone);
+        navigate('/register', { state: { phone: response?.phone || phone } });
         return;
       }
       notifySuccess('Karibu tena', 'Umeingia mafanikio.');

@@ -60,11 +60,14 @@ export interface VerifyOtpRequest {
 export interface VerifyOtpResponse {
   success: boolean;
   message: string;
-  token: string;
-  user: AuthUser;
+  isNewUser: boolean;
+  token: string | null;
+  phone: string;
+  user?: AuthUser;
 }
 
 export interface RegisterDetailsRequest {
+  phone: string;
   name: string;
   role: Exclude<UserRole, 'ADMIN'>;
   county: County;
@@ -74,6 +77,7 @@ export interface RegisterDetailsRequest {
 export interface RegisterDetailsResponse {
   success: boolean;
   message: string;
+  token: string;
   user: AuthUser;
 }
 

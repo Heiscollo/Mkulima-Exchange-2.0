@@ -10,8 +10,9 @@ import { notifyError, notifySuccess } from '../utils/notify';
 export function Register() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, registerDetails, refreshUser } = useAuth();
+  const { currentUser, registerDetails } = useAuth();
 
+  const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<'FARMER' | 'BUYER'>('BUYER');
   const [county, setCounty] = useState('');
@@ -21,6 +22,10 @@ export function Register() {
 
   useEffect(() => {
     const state = location.state as { phone?: string } | null;
+    const pendingPhone = localStorage.getItem('pending_phone') || '';
+
+    setPhone(state?.phone || pendingPhone || currentUser?.phone || '');
+
     if (currentUser?.name && currentUser.name !== 'Pending') {
       setName(currentUser.name);
     }
@@ -32,8 +37,8 @@ export function Register() {
     }
     if (currentUser?.mpesaNumber) {
       setMpesaNumber(currentUser.mpesaNumber);
-    } else if (state?.phone) {
-      setMpesaNumber(state.phone);
+    } else if (pendingPhone || state?.phone || currentUser?.phone) {
+      setMpesaNumber(pendingPhone || state?.phone || currentUser?.phone || '');
     }
   }, [currentUser, location.state]);
 
@@ -46,18 +51,21 @@ export function Register() {
       if (!name.trim()) {
         throw new Error('Name is required');
       }
+      if (!phone.trim()) {
+        throw new Error('Phone number is required');
+      }
       if (!county) {
         throw new Error('County is required');
       }
 
       await registerDetails({
+        phone: phone.trim(),
         name: name.trim(),
         role,
         county: county as any,
         mpesaNumber,
       });
 
-      await refreshUser();
       notifySuccess('Profile saved', 'Akaunti yako imewekwa kikamilifu.');
       navigate('/home');
     } catch (err: any) {
@@ -108,6 +116,9 @@ export function Register() {
           <GlassCard variant="light" className="rounded-[32px] border border-white/50 p-6 lg:border-[#F4ECE1] lg:bg-white lg:p-8">
             <form onSubmit={handleRegister} className="space-y-4">
               {error ? <div className="rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{error}</div> : null}
+              <div className="rounded-2xl border border-[#F4ECE1] bg-[#FDFBF7] px-4 py-3 text-sm font-bold text-[#2B1612]">
+                Verified phone: <span className="font-black text-[#008D41]">{phone || 'Not found'}</span>
+              </div>
               <div>
                 <label className="mb-2 ml-1 block text-sm font-bold text-white lg:text-[#2B1612]">Full name</label>
                 <Input icon={<User size={18} />} value={name} onChange={(e) => setName(e.target.value)} placeholder="Jina kamili" required className="bg-white lg:bg-[#FDFBF7]" />
