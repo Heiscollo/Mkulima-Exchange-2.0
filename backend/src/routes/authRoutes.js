@@ -1,6 +1,5 @@
 import express from 'express';
 import * as authController from '../controllers/authController.js';
-import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,12 +21,11 @@ router.post('/verify-otp', authController.verifyOTP);
 
 /**
  * POST /api/auth/register-details
- * Protected endpoint
- * Requires: JWT token in Authorization header
- * Request body: { name, role, county, mpesaNumber }
- * Response: { success, message, user }
+ * Public endpoint
+ * Request body: { phone, name, role, county, mpesaNumber }
+ * Response: { success, message, token, user }
  */
-router.post('/register-details', authenticateToken, authController.registerDetails);
+router.post('/register-details', authController.registerDetails);
 
 /**
  * GET /api/auth/me

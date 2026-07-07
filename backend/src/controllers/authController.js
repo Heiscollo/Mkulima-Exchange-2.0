@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { normalizePhone, isValidKenyaPhone } from '../utils/phone.js';
 import { generateOTP, generateOTPExpiry, isOTPExpired } from '../utils/otp.js';
 import { sendOTPSMS } from '../utils/africasTalking.js';
@@ -115,21 +115,18 @@ export const verifyOTP = async (req, res) => {
       where: { id: otpRecord.id },
     });
 
-    // Find or create user
+    // Check whether the phone already belongs to an existing user
     let user = await prisma.user.findUnique({
       where: { phone: normalizedPhone },
     });
 
     if (!user) {
-      // Create new user
-      user = await prisma.user.create({
-        data: {
-          phone: normalizedPhone,
-          mpesaNumber: normalizedPhone, // Set to phone by default
-          name: 'Pending', // Will be updated in register-details
-          role: 'BUYER', // Default role
-          isVerified: true,
-        },
+      return res.status(200).json({
+        success: true,
+        isNewUser: true,
+        token: null,
+        message: 'New user - registration required',
+        phone: normalizedPhone,
       });
     }
 
@@ -146,13 +143,16 @@ export const verifyOTP = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'OTP verified successfully',
+      isNewUser: false,
+      message: 'Login successful',
       token: token,
       user: {
         id: user.id,
         phone: user.phone,
         role: user.role,
         name: user.name,
+        county: user.county,
+        mpesaNumber: user.mpesaNumber,
         isVerified: user.isVerified,
       },
     });
@@ -169,8 +169,21 @@ export const verifyOTP = async (req, res) => {
  */
 export const registerDetails = async (req, res) => {
   try {
-    const { name, role, county, mpesaNumber } = req.body;
-    const userId = req.user.userId; // From JWT middleware
+    const { phone, name, role, county, mpesaNumber } = req.body;
+
+    if (!phone || !name || !role || !county) {
+      return res.status(400).json({
+        error: 'Phone, name, role, and county are required',
+      });
+    }
+
+    const normalizedPhone = normalizePhone(phone);
+
+    if (!isValidKenyaPhone(normalizedPhone)) {
+      return res.status(400).json({
+        error: 'Invalid Kenyan phone number',
+      });
+    }
 
     // Validate required fields
     if (!name || !role || !county) {
@@ -186,17 +199,7 @@ export const registerDetails = async (req, res) => {
       });
     }
 
-    // Validate county exists in enum
-    const validCounties = [
-      'MOMBASA', 'KWALE', 'KILIFI', 'TANA_RIVER', 'LAMU', 'TAITA_TAVETA',
-      'GARISSA', 'WAJIR', 'MANDERA', 'MARSABIT', 'ISIOLO', 'SAMBURU',
-      'TURKANA', 'WEST_POKOT', 'BARINGO', 'ELGEYO_MARAKWET', 'NANDI',
-      'UASIN_GISHU', 'KERICHO', 'BOMET', 'KAKAMEGA', 'VIHIGA', 'BUNGOMA',
-      'BUSIA', 'SIAYA', 'KISUMU', 'HOMA_BAY', 'MIGORI', 'NYAMIRA',
-      'KISII', 'NAROK', 'KAJIADO', 'KERICHO', 'NAKURU', 'NAIROBI',
-      'KIAMBU', 'MURANGA', 'MURANG_A', 'NYERI', 'KIRINYAGA', 'EMBU', 'MERU',
-      'THARAKA_NITHI', 'MACHAKOS', 'MAKUENI', 'NYANDARUA', 'LAIKIPIA',
-    ];
+    const validCounties = Object.values(Prisma.County);
 
     if (!validCounties.includes(county)) {
       return res.status(400).json({
@@ -204,62 +207,84 @@ export const registerDetails = async (req, res) => {
       });
     }
 
-    // Update user
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name: name,
-        role: role,
-        county: county,
-        mpesaNumber: mpesaNumber || req.user.phone,
-        isVerified: true,
-      },
-    });
-
-    // Create profile based on role
-    if (role === 'FARMER') {
-      // Check if profile already exists
-      const existingProfile = await prisma.farmerProfile.findUnique({
-        where: { userId: userId },
+    const savedUser = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findUnique({
+        where: { phone: normalizedPhone },
       });
 
-      if (!existingProfile) {
-        await prisma.farmerProfile.create({
-          data: {
-            userId: userId,
-            farmSizeAcres: 0, // Default value
-            cropsGrown: [], // Empty array
-            county: county,
+      const userData = {
+        phone: normalizedPhone,
+        name,
+        role,
+        county,
+        mpesaNumber: mpesaNumber || normalizedPhone,
+        isVerified: true,
+      };
+
+      const nextUser = existingUser
+        ? await tx.user.update({
+            where: { phone: normalizedPhone },
+            data: userData,
+          })
+        : await tx.user.create({
+            data: userData,
+          });
+
+      if (role === 'FARMER') {
+        await tx.farmerProfile.upsert({
+          where: { userId: nextUser.id },
+          update: {
+            county,
+          },
+          create: {
+            userId: nextUser.id,
+            farmSizeAcres: 0,
+            cropsGrown: [],
+            county,
           },
         });
       }
-    } else if (role === 'BUYER') {
-      // Check if profile already exists
-      const existingProfile = await prisma.buyerProfile.findUnique({
-        where: { userId: userId },
-      });
 
-      if (!existingProfile) {
-        await prisma.buyerProfile.create({
-          data: {
-            userId: userId,
+      if (role === 'BUYER') {
+        await tx.buyerProfile.upsert({
+          where: { userId: nextUser.id },
+          update: {
+            businessName: name,
+            businessType: 'Individual',
+          },
+          create: {
+            userId: nextUser.id,
             businessName: name,
             businessType: 'Individual',
           },
         });
       }
-    }
+
+      return nextUser;
+    });
+
+    const token = jwt.sign(
+      {
+        userId: savedUser.id,
+        phone: savedUser.phone,
+        role: savedUser.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     return res.status(200).json({
       success: true,
       message: 'User details registered successfully',
+      token,
       user: {
-        id: updatedUser.id,
-        phone: updatedUser.phone,
-        name: updatedUser.name,
-        role: updatedUser.role,
-        county: updatedUser.county,
-        isVerified: updatedUser.isVerified,
+        id: savedUser.id,
+        phone: savedUser.phone,
+        name: savedUser.name,
+        role: savedUser.role,
+        county: savedUser.county,
+        mpesaNumber: savedUser.mpesaNumber,
+        isVerified: savedUser.isVerified,
       },
     });
   } catch (error) {
