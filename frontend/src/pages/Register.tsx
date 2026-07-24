@@ -5,6 +5,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { Input } from '../components/ui/Input';
 import { CountySelect } from '../components/CountySelect';
 import { useAuth } from '../contexts/AuthContext';
+import { authApi, setAuthToken } from '../services/api';
 import { notifyError, notifySuccess } from '../utils/notify';
 
 export function Register() {
@@ -48,26 +49,31 @@ export function Register() {
     setError('');
 
     try {
+      const phoneValue = phone.trim();
+
       if (!name.trim()) {
         throw new Error('Name is required');
       }
-      if (!phone.trim()) {
+      if (!phoneValue) {
         throw new Error('Phone number is required');
       }
       if (!county) {
         throw new Error('County is required');
       }
 
-      await registerDetails({
-        phone: phone.trim(),
+      const response = await authApi.registerDetails({
+        phone: phoneValue,
         name: name.trim(),
         role,
         county: county as any,
-        mpesaNumber,
+        mpesaNumber: mpesaNumber.trim(),
       });
 
+      setAuthToken(response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+
       notifySuccess('Profile saved', 'Akaunti yako imewekwa kikamilifu.');
-      navigate('/home');
+      window.location.assign('/home');
     } catch (err: any) {
       const message = err?.response?.data?.message || err?.message || 'Failed to register. Please try again.';
       setError(message);
