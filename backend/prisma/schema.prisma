@@ -1,0 +1,315 @@
+// Mkulima Exchange Prisma Schema
+// Connecting Kenyan farmers directly to buyers
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  FARMER
+  BUYER
+  ADMIN
+}
+
+enum County {
+  MOMBASA
+  KWALE
+  KILIFI
+  TANA_RIVER
+  LAMU
+  TAITA_TAVETA
+  GARISSA
+  WAJIR
+  MANDERA
+  MARSABIT
+  ISIOLO
+  MERU
+  THARAKA_NITHI
+  EMBU
+  KITUI
+  MACHAKOS
+  MAKUENI
+  NYANDARUA
+  NYERI
+  KIRINYAGA
+  MURANGA
+  KIAMBU
+  TURKANA
+  WEST_POKOT
+  SAMBURU
+  TRANS_NZOIA
+  UASIN_GISHU
+  ELGEYO_MARAKWET
+  NANDI
+  BARINGO
+  LAIKIPIA
+  NAKURU
+  NAROK
+  KAJIADO
+  KERICHO
+  BOMET
+  KAKAMEGA
+  VIHIGA
+  BUNGOMA
+  BUSIA
+  SIAYA
+  KISUMU
+  HOMA_BAY
+  MIGORI
+  KISII
+  NYAMIRA
+  NAIROBI
+}
+
+enum CropCategory {
+  CEREALS_AND_GRAINS
+  LEGUMES_AND_PULSES
+  VEGETABLES
+  FRUITS
+  ROOT_CROPS_AND_TUBERS
+  CASH_CROPS
+  HERBS_AND_SPICES
+  NUTS_AND_SEEDS
+  DAIRY_AND_LIVESTOCK_PRODUCTS
+  FISH_AND_SEAFOOD
+  TREE_CROPS_AND_OTHERS
+}
+
+enum Unit {
+  KG
+  BAG
+  CRATE
+  TONNE
+  LITRE
+  BUNCH
+  SACK
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  PAID
+  DELIVERED
+  COMPLETED
+  DISPUTED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+// User model - represents both farmers and buyers
+model User {
+  id              String        @id @default(cuid())
+  phone           String        @unique
+  name            String
+  role            UserRole      @default(BUYER)
+  county          County?
+  mpesaNumber     String?       @unique
+  isVerified      Boolean       @default(false)
+
+  // Relationships
+  farmerProfile   FarmerProfile?
+  buyerProfile    BuyerProfile?
+  listings        Listing[]
+  buyerOrders     Order[]       @relation("buyer")
+  farmerOrders    Order[]       @relation("farmer")
+  sentReviews     Review[]      @relation("reviewer")
+  receivedReviews Review[]      @relation("reviewed")
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([phone])
+  @@index([role])
+  @@index([county])
+}
+
+// Farmer Profile
+model FarmerProfile {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String        @unique
+  farmSizeAcres   Float?
+  cropsGrown      String[]
+  county          County?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+// Buyer Profile
+model BuyerProfile {
+  id              String        @id @default(cuid())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String        @unique
+  businessName    String?
+  businessType    String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+// OTP Code for SMS login
+model OtpCode {
+  id              String        @id @default(cuid())
+  phone           String
+  codeHash        String
+  expiresAt       DateTime
+
+  createdAt       DateTime      @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
+}
+
+// Listing model
+model Listing {
+  id              String        @id @default(cuid())
+  farmer          User          @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  farmerId        String
+  
+  cropName        String
+  cropCategory    CropCategory
+  quantity        Float
+  unit            Unit
+  pricePerUnit    Float
+  minimumOrderQuantity Float?
+  county          County
+  description     String?
+  availableDate   DateTime
+  status          ListingStatus @default(ACTIVE)
+  images          String[]
+  
+  orders          Order[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([farmerId])
+  @@index([cropCategory])
+  @@index([county])
+  @@index([status])
+}
+
+// Order model
+model Order {
+  id              String        @id @default(cuid())
+  listing         Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId       String
+  
+  buyer           User          @relation("buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId         String
+  
+  farmer          User          @relation("farmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  farmerId        String
+  
+  quantity        Float
+  totalPrice      Float
+  offeredPrice    Float?
+  counterRound    Int           @default(0)
+  expiresAt       DateTime?
+  farmerConfirmed Boolean       @default(false)
+  buyerConfirmed  Boolean       @default(false)
+  status          OrderStatus   @default(PENDING)
+  
+  payment         Payment?
+  // Each completed order can produce two independent reviews: one from the
+  // buyer and one from the farmer. Reputation should therefore be bilateral,
+  // not collapsed into a single row, because the trust signal protects both
+  // sides of the market from opaque counterparties.
+  reviews         Review[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([buyerId])
+  @@index([farmerId])
+  @@index([listingId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// Payment model (M-Pesa transactions - ESCROW SYSTEM)
+// Money is held after buyer pays (HELD status)
+// Only released to farmer after both parties confirm delivery (RELEASED status)
+model Payment {
+  id                    String        @id @default(cuid())
+  order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId               String        @unique
+  
+  mpesaTransactionId    String?       @unique
+  amount                Float
+  status                PaymentStatus @default(PENDING)
+  
+  // Payer and receiver phone numbers for SMS notifications
+  payerPhone            String
+  farmerPhone           String?
+  
+  // Delivery confirmation flags for escrow release
+  buyerConfirmed        Boolean       @default(false)
+  farmerConfirmed       Boolean       @default(false)
+  
+  paidAt                DateTime?
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([status])
+  @@index([mpesaTransactionId])
+}
+
+// Review model
+model Review {
+  id              String        @id @default(cuid())
+  reviewer        User          @relation("reviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewerId      String
+  
+  reviewed        User          @relation("reviewed", fields: [reviewedId], references: [id], onDelete: Cascade)
+  reviewedId      String
+  
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId         String
+  
+  rating          Int
+  comment         String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // A reviewer may leave exactly one review per order. This preserves the
+  // integrity of reputation data by preventing duplicate feedback while still
+  // allowing both parties in the same transaction to rate each other.
+  @@unique([reviewerId, orderId])
+  @@index([reviewedId])
+  @@index([orderId])
+}
