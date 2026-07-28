@@ -211,62 +211,81 @@ export const updateOwnProfile = async (req, res) => {
       return errorResponse(res, 400, 'No profile fields provided');
     }
 
-    const updatedUser = await prisma.$transaction(async (transaction) => {
-      const currentUser = Object.keys(userUpdateData).length
-        ? await transaction.user.update({
-            where: { id: userId },
-            data: userUpdateData,
-          })
-        : user;
+    // Sequential individual queries — no $transaction wrapper.
+    // Supabase's free-tier connection pooler drops interactive transactions,
+    // which surfaced as P2028 transaction timeout errors here.
+    const currentUser = Object.keys(userUpdateData).length
+      ? await prisma.user.update({
+          where: { id: userId },
+          data: userUpdateData,
+        })
+      : user;
 
-      if (currentUser.role === 'FARMER') {
-        const updateFarmSize = farmSizeAcres !== undefined ? Number(farmSizeAcres) : undefined;
-        if (updateFarmSize !== undefined && Number.isNaN(updateFarmSize)) {
-          throw new Error('Farm size must be a number');
-        }
+    if (currentUser.role === 'FARMER') {
+      const updateFarmSize = farmSizeAcres !== undefined ? Number(farmSizeAcres) : undefined;
+      if (updateFarmSize !== undefined && Number.isNaN(updateFarmSize)) {
+        throw new Error('Farm size must be a number');
+      }
 
-        const cropsArray = cropsGrown === undefined
-          ? undefined
-          : Array.isArray(cropsGrown)
-            ? cropsGrown.map((crop) => String(crop).trim()).filter(Boolean)
-            : String(cropsGrown)
-                .split(',')
-                .map((crop) => crop.trim())
-                .filter(Boolean);
+      const cropsArray = cropsGrown === undefined
+        ? undefined
+        : Array.isArray(cropsGrown)
+          ? cropsGrown.map((crop) => String(crop).trim()).filter(Boolean)
+          : String(cropsGrown)
+              .split(',')
+              .map((crop) => crop.trim())
+              .filter(Boolean);
 
-        await transaction.farmerProfile.upsert({
+      const existingFarmerProfile = await prisma.farmerProfile.findUnique({
+        where: { userId },
+      });
+
+      if (existingFarmerProfile) {
+        await prisma.farmerProfile.update({
           where: { userId },
-          create: {
-            userId,
-            farmSizeAcres: updateFarmSize,
-            cropsGrown: cropsArray || [],
-            county: county || currentUser.county,
-          },
-          update: {
+          data: {
             ...(updateFarmSize !== undefined ? { farmSizeAcres: updateFarmSize } : {}),
             ...(cropsArray !== undefined ? { cropsGrown: cropsArray } : {}),
             ...(county !== undefined ? { county } : {}),
           },
         });
-      }
-
-      if (currentUser.role === 'BUYER') {
-        await transaction.buyerProfile.upsert({
-          where: { userId },
-          create: {
+      } else {
+        await prisma.farmerProfile.create({
+          data: {
             userId,
-            businessName: businessName !== undefined ? String(businessName).trim() : currentUser.name,
-            businessType: businessType !== undefined ? String(businessType).trim() : 'Individual',
+            farmSizeAcres: updateFarmSize,
+            cropsGrown: cropsArray || [],
+            county: county || currentUser.county,
           },
-          update: {
+        });
+      }
+    }
+
+    if (currentUser.role === 'BUYER') {
+      const existingBuyerProfile = await prisma.buyerProfile.findUnique({
+        where: { userId },
+      });
+
+      if (existingBuyerProfile) {
+        await prisma.buyerProfile.update({
+          where: { userId },
+          data: {
             ...(businessName !== undefined ? { businessName: String(businessName).trim() } : {}),
             ...(businessType !== undefined ? { businessType: String(businessType).trim() } : {}),
           },
         });
+      } else {
+        await prisma.buyerProfile.create({
+          data: {
+            userId,
+            businessName: businessName !== undefined ? String(businessName).trim() : currentUser.name,
+            businessType: businessType !== undefined ? String(businessType).trim() : 'Individual',
+          },
+        });
       }
+    }
 
-      return currentUser;
-    });
+    const updatedUser = currentUser;
 
     const refreshedUser = await prisma.user.findUnique({
       where: { id: updatedUser.id },

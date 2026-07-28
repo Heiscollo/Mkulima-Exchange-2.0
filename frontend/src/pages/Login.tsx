@@ -1,136 +1,127 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Leaf } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowRight, Leaf, MessageCircle, Phone } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Input } from '../components/ui/Input';
-import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 export function Login() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const location = useLocation();
   const { login } = useAuth();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const presetPhone = useMemo(() => (location.state as { phone?: string } | null)?.phone || '', [location.state]);
+  const [phone, setPhone] = useState(presetPhone);
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const sendOtp = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
     setError('');
-    
+
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      login(response.data);
+      await login(phone);
+      notifySuccess('OTP sent', 'Check your phone for the verification code.');
+      setStep('otp');
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.response?.data?.error || 'Failed to send OTP.';
+      setError(message);
+      notifyError('Login failed', message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await login(phone, otp);
+      if (response?.isNewUser || !response?.user?.name || response?.user?.name === 'Pending' || !response?.user?.role) {
+        localStorage.setItem('pending_phone', response?.phone || phone);
+        navigate('/register', { state: { phone: response?.phone || phone } });
+        return;
+      }
+      notifySuccess('Karibu tena!', 'Login successful');
       navigate('/home');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
+      const message = err?.response?.data?.message || err?.response?.data?.error || 'Failed to verify OTP.';
+      setError(message);
+      notifyError('Verification failed', message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-[#FDFBF7]">
-      {/* Left Side - Image (Hidden on mobile) */}
-      <div className="hidden w-1/2 lg:block relative p-6">
-        <div className="h-full w-full relative overflow-hidden rounded-[40px] shadow-2xl">
-          <img 
-            src="https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1000&auto=format&fit=crop" 
+    <div className="flex min-h-screen w-full bg-[#FDFBF7] dark:bg-[#15100D]">
+      <div className="hidden w-1/2 p-6 lg:block">
+        <div className="relative h-full overflow-hidden rounded-[40px] shadow-2xl">
+          <img
+            src="https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1000&auto=format&fit=crop"
             alt="Farm"
             className="absolute inset-0 h-full w-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2B1612] via-[#2B1612]/30 to-transparent opacity-90" />
-          <div className="absolute bottom-16 left-16 right-16">
-            <h2 className="text-4xl lg:text-5xl font-black text-white leading-[1.1] tracking-tight">
-              {t('onboarding.title1')}
-            </h2>
-            <p className="mt-6 text-xl text-white/80 font-medium max-w-md">
-              {t('onboarding.subtitle1')}
-            </p>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2B1612] via-[#2B1612]/30 to-transparent" />
+          <div className="absolute bottom-10 left-10 right-10 text-white">
+            <h2 className="text-4xl font-black leading-tight">Mkulima Exchange</h2>
+            <p className="mt-4 max-w-lg text-lg text-white/80">Ingia kwa OTP ya nambari yako. Hii hulinda wakulima na wanunuzi kwa uthibitisho wa haraka.</p>
           </div>
         </div>
       </div>
 
-      {/* Right Side - Form */}
-      <div className="flex w-full items-center justify-center lg:w-1/2 px-8 py-12 relative overflow-hidden">
-        {/* Mobile background (only visible on small screens) */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat lg:hidden"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1000&auto=format&fit=crop)' }}
-        />
-        <div className="absolute inset-0 bg-[#2B1612]/70 backdrop-blur-md lg:hidden" />
-        
-        {/* Subtle kikoy pattern background for web */}
-        <div className="hidden lg:block absolute inset-0 bg-pattern-kikoy opacity-30 pointer-events-none" />
-
+      <div
+        className="relative flex w-full items-center justify-center px-4 py-8 lg:w-1/2 lg:px-8"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?q=80&w=1000&auto=format&fit=crop)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-[#2B1612]/70 lg:hidden" />
         <div className="relative z-10 w-full max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <div className="mb-10 text-center lg:text-left">
-              <div className="mx-auto lg:mx-0 mb-8 relative flex h-20 w-20 items-center justify-center rounded-[24px] bg-gradient-kenya shadow-xl shadow-[#008D41]/30">
-                <Leaf className="text-white absolute bottom-2 right-2 opacity-20" size={32} />
-                <span className="text-4xl font-black text-white">M</span>
+          <GlassCard variant="light" className="rounded-[32px] border border-white/50 p-6 lg:border-[#F4ECE1] dark:lg:border-[#3A2B26] lg:bg-white dark:lg:bg-[#221917] lg:p-8">
+            <div className="mb-6 text-center lg:text-left">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-kenya text-white shadow-xl shadow-[#008D41]/30 lg:mx-0">
+                <Leaf size={30} />
               </div>
-              <h1 className="text-4xl font-black text-white lg:text-[#2B1612] tracking-tighter">{t('login.welcome')}</h1>
-              <p className="mt-2 text-lg text-white/80 lg:text-[#2B1612]/60 font-medium">{t('login.subtitle')}</p>
+              <h1 className="text-4xl font-black text-white lg:text-[#2B1612] dark:lg:text-[#F4ECE1]">Karibu tena</h1>
+              <p className="mt-2 text-white/80 lg:text-[#2B1612]/60 dark:lg:text-[#F4ECE1]/60">{step === 'phone' ? 'Weka nambari yako ili upokee OTP.' : 'Weka OTP uliyopewa.'}</p>
             </div>
-
-            <GlassCard variant="light" className="lg:bg-white lg:shadow-xl lg:shadow-[#008D41]/5 lg:border-[#F4ECE1] p-8 rounded-[32px]">
-              <form onSubmit={handleLogin} className="space-y-6">
-                {error && <div className="p-3 bg-red-100 text-red-700 rounded-xl text-sm font-bold">{error}</div>}
-                <div>
-                  <label className="block text-sm font-bold text-white/90 lg:text-[#2B1612] mb-2 ml-2">{t('login.emailLabel')}</label>
-                  <Input 
-                    type="email" 
-                    placeholder={t('login.emailPlaceholder')} 
-                    icon={<Mail size={20} className="text-[#2B1612]/40" />} 
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="lg:bg-[#FDFBF7] lg:border-[#F4ECE1] text-[#2B1612]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-white/90 lg:text-[#2B1612] mb-2 ml-2">{t('login.passwordLabel')}</label>
-                  <Input 
-                    type="password" 
-                    placeholder={t('login.passwordPlaceholder')}
-                    icon={<Lock size={20} className="text-[#2B1612]/40" />} 
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="lg:bg-[#FDFBF7] lg:border-[#F4ECE1] text-[#2B1612]"
-                  />
-                </div>
-                
-                <div className="flex justify-end mt-2">
-                  <button type="button" className="text-sm font-bold text-white lg:text-[#E32636] hover:text-[#A8E063] lg:hover:text-[#008D41] transition-colors">
-                    {t('login.forgotPassword')}
-                  </button>
-                </div>
-
-                <button disabled={isLoading} type="submit" className="w-full flex items-center justify-center gap-2 py-4 rounded-[16px] bg-gradient-kenya text-white font-bold text-lg shadow-lg shadow-[#008D41]/30 transition-transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed">
-                  {isLoading ? 'Logging in...' : t('login.loginButton')} {!isLoading && <ArrowRight size={20} />}
-                </button>
-              </form>
-
-              <div className="mt-8 text-center text-base font-medium text-white/80 lg:text-[#2B1612]/60">
-                {t('login.noAccount')}{' '}
-                <Link to="/register" className="font-black text-[#A8E063] lg:text-[#008D41] hover:underline">
-                  {t('login.signupText')}
-                </Link>
+            <form onSubmit={step === 'phone' ? sendOtp : verifyOtp} className="space-y-5">
+              {error ? <div className="rounded-2xl bg-red-50 dark:bg-red-950 p-3 text-sm font-bold text-red-700 dark:text-red-300">{error}</div> : null}
+              <div>
+                <label className="mb-2 ml-1 block text-sm font-bold text-white lg:text-[#2B1612] dark:lg:text-[#F4ECE1]">Phone number</label>
+                <Input icon={<Phone size={18} />} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0712 345 678" required className="bg-white lg:bg-[#FDFBF7] dark:lg:bg-[#1D1512]" />
               </div>
-            </GlassCard>
-          </motion.div>
+              {step === 'otp' ? (
+                <div>
+                  <label className="mb-2 ml-1 block text-sm font-bold text-white lg:text-[#2B1612] dark:lg:text-[#F4ECE1]">OTP</label>
+                  <Input icon={<MessageCircle size={18} />} value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="6-digit code" required className="bg-white lg:bg-[#FDFBF7] dark:lg:bg-[#1D1512]" />
+                </div>
+              ) : null}
+              <button
+                disabled={loading}
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-base font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? 'Please wait...' : step === 'phone' ? 'Send OTP' : 'Verify OTP'} {!loading && <ArrowRight size={18} />}
+              </button>
+            </form>
+            <div className="mt-6 text-center text-sm font-medium text-white/80 lg:text-[#2B1612]/60 dark:lg:text-[#F4ECE1]/60">
+              New here?{' '}
+              <Link to="/register" className="font-black text-[#A8E063] lg:text-[#008D41]">
+                Complete registration
+              </Link>
+            </div>
+          </GlassCard>
         </div>
       </div>
     </div>

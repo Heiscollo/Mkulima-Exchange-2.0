@@ -1,4 +1,4 @@
-import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosHeaders, type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { notifyError } from '../utils/notify';
 import { type AgriculturalCategory, type County } from '../constants/kenya';
 
@@ -314,7 +314,8 @@ export const clearAuthToken = () => {
 
 apiClient.interceptors.request.use((config) => {
   const token = getAuthToken();
-  if (token && config.headers && !config.headers.Authorization) {
+  if (token) {
+    config.headers = config.headers ?? new AxiosHeaders();
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

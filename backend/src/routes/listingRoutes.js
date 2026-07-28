@@ -109,8 +109,8 @@ router.get(
       .isLength({ min: 1, max: 100 })
       .withMessage('Crop name must be between 1 and 100 characters'),
     query('crop_category')
+      .optional({ checkFalsy: true })
       .trim()
-      .optional()
       .isIn([
         'CEREALS_AND_GRAINS',
         'LEGUMES_AND_PULSES',

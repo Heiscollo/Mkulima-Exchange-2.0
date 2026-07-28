@@ -1,152 +1,73 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, Plus, Trash2, CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
-
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'mpesa' | 'bank';
-  name: string;
-  details: string;
-  isDefault: boolean;
-}
+import React, { useEffect, useState } from 'react';
+import { CreditCard, ShieldCheck } from 'lucide-react';
+import { orderApi, paymentApi, type Order } from '../services/api';
+import { formatKES } from '../utils/marketplace';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 export function Payments() {
-  const navigate = useNavigate();
-  const { t } = useLanguage();
-  const [payments, setPayments] = useState<PaymentMethod[]>([
-    {
-      id: '1',
-      type: 'mpesa',
-      name: 'M-Pesa',
-      details: 'Linked to +254 712 345678',
-      isDefault: true,
-    },
-  ]);
-  const [showForm, setShowForm] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = (id: string) => {
-    setPayments(payments.filter(p => p.id !== id));
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const response = await orderApi.getOrders();
+        setOrders(response.data || []);
+      } catch {
+        notifyError('Could not load payments', 'Tafadhali jaribu tena.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const startPayment = async (orderId: string) => {
+    try {
+      await paymentApi.initiatePayment(orderId);
+      notifySuccess('Payment requested', 'Follow the M-Pesa prompt on your phone.');
+    } catch (error: any) {
+      notifyError('Payment failed', error?.response?.data?.message || 'Could not initiate payment.');
+    }
   };
 
-  const handleSetDefault = (id: string) => {
-    setPayments(payments.map(p => ({
-      ...p,
-      isDefault: p.id === id,
-    })));
-  };
-
-  const getPaymentIcon = (type: string) => {
-    switch (type) {
-      case 'mpesa':
-        return '📱';
-      case 'card':
-        return '💳';
-      case 'bank':
-        return '🏦';
-      default:
-        return '💰';
+  const confirmDelivery = async (orderId: string) => {
+    try {
+      await paymentApi.confirmDelivery(orderId);
+      notifySuccess('Delivery confirmed', 'Escrow can now be released.');
+    } catch (error: any) {
+      notifyError('Confirmation failed', error?.response?.data?.message || 'Could not confirm delivery.');
     }
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="w-full pb-24"
-    >
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pt-12">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/profile')}
-              className="p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
-            >
-              <ArrowLeft size={24} />
-            </button>
-            <h1 className="text-3xl font-black text-[#2B1612]">{t('profile.payments')}</h1>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-kenya text-white rounded-xl font-bold hover:scale-105 transition-transform"
-          >
-            <Plus size={20} /> Add Payment
-          </button>
-        </div>
+    <div className="w-full min-h-screen bg-[#FDFBF7] pb-24">
+      <div className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-black tracking-tight text-[#2B1612]">Payments</h1>
+        <p className="mt-2 text-lg font-medium text-[#2B1612]/60">Track escrow, initiate M-Pesa prompts, and confirm delivery.</p>
 
-        {/* Add Payment Form */}
-        {showForm && (
-          <div className="rounded-[32px] bg-white shadow-xl shadow-[#008D41]/5 border border-[#F4ECE1] p-8 mb-8">
-            <h2 className="text-xl font-bold text-[#2B1612] mb-6">Add Payment Method</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <button className="p-4 border-2 border-[#F4ECE1] rounded-xl hover:border-[#008D41] transition-colors text-center">
-                  <div className="text-3xl mb-2">📱</div>
-                  <p className="text-sm font-bold text-[#2B1612]">M-Pesa</p>
-                </button>
-                <button className="p-4 border-2 border-[#F4ECE1] rounded-xl hover:border-[#008D41] transition-colors text-center">
-                  <div className="text-3xl mb-2">💳</div>
-                  <p className="text-sm font-bold text-[#2B1612]">Card</p>
-                </button>
-                <button className="p-4 border-2 border-[#F4ECE1] rounded-xl hover:border-[#008D41] transition-colors text-center">
-                  <div className="text-3xl mb-2">🏦</div>
-                  <p className="text-sm font-bold text-[#2B1612]">Bank</p>
-                </button>
+        {loading ? (
+          <div className="mt-8 rounded-[32px] border border-[#F4ECE1] bg-white p-10 text-center text-[#2B1612]/60">Loading payment data...</div>
+        ) : (
+          <div className="mt-8 grid gap-4">
+            {orders.map((order) => (
+              <div key={order.id} className="rounded-[32px] border border-[#F4ECE1] bg-white p-6 shadow-sm md:flex md:items-center md:justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.25em] text-[#008D41]"><ShieldCheck size={16} /> {order.status}</div>
+                  <h2 className="mt-2 text-2xl font-black text-[#2B1612]">{order.listing?.cropName || 'Order'} x {order.quantity}</h2>
+                  <p className="mt-1 text-[#2B1612]/60">{formatKES(order.totalPrice)}</p>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3 md:mt-0">
+                  <button onClick={() => startPayment(order.id)} className="inline-flex items-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-3 font-black text-white"><CreditCard size={16} /> Pay</button>
+                  <button onClick={() => confirmDelivery(order.id)} className="inline-flex items-center gap-2 rounded-2xl bg-[#008D41]/10 px-5 py-3 font-black text-[#008D41]">Confirm delivery</button>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="flex-1 px-4 py-3 border-2 border-[#2B1612]/20 text-[#2B1612] rounded-xl font-bold hover:bg-[#F4ECE1] transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         )}
-
-        {/* Payment Methods */}
-        <div className="space-y-4">
-          {payments.map((payment) => (
-            <div
-              key={payment.id}
-              className="rounded-[24px] bg-white shadow-sm border-2 border-[#F4ECE1] p-6 hover:border-[#008D41] transition-all flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4 flex-1">
-                <div className="text-3xl">{getPaymentIcon(payment.type)}</div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#2B1612]">{payment.name}</h3>
-                  <p className="text-sm text-[#2B1612]/60">{payment.details}</p>
-                </div>
-                {payment.isDefault && (
-                  <span className="px-3 py-1 bg-[#008D41]/10 text-[#008D41] text-xs font-bold rounded-full">
-                    Default
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {!payment.isDefault && (
-                  <button
-                    onClick={() => handleSetDefault(payment.id)}
-                    className="px-3 py-2 text-xs font-bold text-[#008D41] bg-[#008D41]/10 rounded-lg hover:bg-[#008D41] hover:text-white transition-colors"
-                  >
-                    Set Default
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDelete(payment.id)}
-                  className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

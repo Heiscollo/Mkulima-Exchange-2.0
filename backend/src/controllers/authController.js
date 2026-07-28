@@ -199,69 +199,95 @@ export const registerDetails = async (req, res) => {
       });
     }
 
-    const validCounties = Object.values(Prisma.County);
+    const VALID_COUNTIES = [
+      'MOMBASA','KWALE','KILIFI','TANA_RIVER','LAMU',
+      'TAITA_TAVETA','GARISSA','WAJIR','MANDERA','MARSABIT',
+      'ISIOLO','MERU','THARAKA_NITHI','EMBU','KITUI',
+      'MACHAKOS','MAKUENI','NYANDARUA','NYERI','KIRINYAGA',
+      'MURANGA','KIAMBU','TURKANA','WEST_POKOT','SAMBURU',
+      'TRANS_NZOIA','UASIN_GISHU','ELGEYO_MARAKWET','NANDI',
+      'BARINGO','LAIKIPIA','NAKURU','NAROK','KAJIADO',
+      'KERICHO','BOMET','KAKAMEGA','VIHIGA','BUNGOMA',
+      'BUSIA','SIAYA','KISUMU','HOMA_BAY','MIGORI',
+      'KISII','NYAMIRA','NAIROBI'
+    ];
 
-    if (!validCounties.includes(county)) {
+    if (!VALID_COUNTIES.includes(county)) {
       return res.status(400).json({
         error: 'Invalid county',
       });
     }
 
-    const savedUser = await prisma.$transaction(async (tx) => {
-      const existingUser = await tx.user.findUnique({
-        where: { phone: normalizedPhone },
+    // Sequential individual queries — no $transaction wrapper.
+    // Supabase's free-tier connection pooler drops interactive transactions,
+    // which surfaced as P2028 transaction timeout errors here.
+    const existingUser = await prisma.user.findUnique({
+      where: { phone: normalizedPhone },
+    });
+
+    const userData = {
+      phone: normalizedPhone,
+      name,
+      role,
+      county,
+      mpesaNumber: mpesaNumber || normalizedPhone,
+      isVerified: true,
+    };
+
+    const savedUser = existingUser
+      ? await prisma.user.update({
+          where: { phone: normalizedPhone },
+          data: userData,
+        })
+      : await prisma.user.create({
+          data: userData,
+        });
+
+    if (role === 'FARMER') {
+      const existingProfile = await prisma.farmerProfile.findUnique({
+        where: { userId: savedUser.id },
       });
 
-      const userData = {
-        phone: normalizedPhone,
-        name,
-        role,
-        county,
-        mpesaNumber: mpesaNumber || normalizedPhone,
-        isVerified: true,
-      };
-
-      const nextUser = existingUser
-        ? await tx.user.update({
-            where: { phone: normalizedPhone },
-            data: userData,
-          })
-        : await tx.user.create({
-            data: userData,
-          });
-
-      if (role === 'FARMER') {
-        await tx.farmerProfile.upsert({
-          where: { userId: nextUser.id },
-          update: {
-            county,
-          },
-          create: {
-            userId: nextUser.id,
+      if (existingProfile) {
+        await prisma.farmerProfile.update({
+          where: { userId: savedUser.id },
+          data: { county },
+        });
+      } else {
+        await prisma.farmerProfile.create({
+          data: {
+            userId: savedUser.id,
             farmSizeAcres: 0,
             cropsGrown: [],
             county,
           },
         });
       }
+    }
 
-      if (role === 'BUYER') {
-        await tx.buyerProfile.upsert({
-          where: { userId: nextUser.id },
-          update: {
+    if (role === 'BUYER') {
+      const existingProfile = await prisma.buyerProfile.findUnique({
+        where: { userId: savedUser.id },
+      });
+
+      if (existingProfile) {
+        await prisma.buyerProfile.update({
+          where: { userId: savedUser.id },
+          data: {
             businessName: name,
             businessType: 'Individual',
           },
-          create: {
-            userId: nextUser.id,
+        });
+      } else {
+        await prisma.buyerProfile.create({
+          data: {
+            userId: savedUser.id,
             businessName: name,
             businessType: 'Individual',
           },
         });
       }
-
-      return nextUser;
-    });
+    }
 
     const token = jwt.sign(
       {
