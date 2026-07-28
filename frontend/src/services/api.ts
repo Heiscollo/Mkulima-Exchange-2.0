@@ -111,6 +111,7 @@ export interface ListingFilters {
   crop_name?: string;
   crop_category?: AgriculturalCategory | '';
   county?: County | '';
+  farmer_id?: string;
   min_price?: number;
   max_price?: number;
   page?: number;
@@ -233,6 +234,7 @@ export interface UpdateProfileRequest {
   cropsGrown?: string[];
   businessName?: string;
   businessType?: string;
+  avatar?: File;
 }
 
 export interface PaymentStatusResponse {
@@ -396,7 +398,29 @@ export const reviewApi = {
   createReview: (payload: CreateReviewRequest) => request<{ success: boolean; message: string; data: OrderReview }>({ method: 'POST', url: '/api/reviews', data: payload }),
   getUserReviews: (userId: string) => request<UserReviewsResponse>({ method: 'GET', url: `/api/users/${userId}/reviews` }),
   getUserProfile: (userId: string) => request<UserProfileResponse>({ method: 'GET', url: `/api/users/${userId}/profile` }),
-  updateOwnProfile: (payload: UpdateProfileRequest) => request<{ success: boolean; message: string; data: AuthUser & { farmerProfile?: FarmerProfile | null; buyerProfile?: BuyerProfile | null } }>({ method: 'PUT', url: '/api/users/profile', data: payload }),
+  updateOwnProfile: (payload: UpdateProfileRequest) => {
+    type ProfileResponse = { success: boolean; message: string; data: AuthUser & { farmerProfile?: FarmerProfile | null; buyerProfile?: BuyerProfile | null } };
+
+    if (payload.avatar) {
+      const formData = new FormData();
+      if (payload.name !== undefined) formData.append('name', payload.name);
+      if (payload.county !== undefined) formData.append('county', payload.county);
+      if (payload.mpesaNumber !== undefined) formData.append('mpesaNumber', payload.mpesaNumber);
+      if (payload.farmSizeAcres !== undefined) formData.append('farmSizeAcres', String(payload.farmSizeAcres));
+      if (payload.cropsGrown !== undefined) payload.cropsGrown.forEach((crop) => formData.append('cropsGrown', crop));
+      if (payload.businessName !== undefined) formData.append('businessName', payload.businessName);
+      if (payload.businessType !== undefined) formData.append('businessType', payload.businessType);
+      formData.append('avatar', payload.avatar);
+      return request<ProfileResponse>({
+        method: 'PUT',
+        url: '/api/users/profile',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+
+    return request<ProfileResponse>({ method: 'PUT', url: '/api/users/profile', data: payload });
+  },
 };
 
 export const adminApi = {

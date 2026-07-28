@@ -42,3 +42,6 @@ export const upload = multer({
 
 // Middleware to handle up to 5 images
 export const uploadListingImages = upload.array('images', 5);
+
+// Middleware to handle a single profile photo
+export const uploadAvatar = upload.single('avatar');

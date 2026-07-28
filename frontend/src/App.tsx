@@ -24,6 +24,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ListingDetail } from './pages/listing-detail';
+import { FarmerProfile } from './pages/FarmerProfile';
 import { Negotiate } from './pages/negotiate';
 import { FarmerDashboard } from './pages/farmer-dashboard';
 import { BuyerDashboard } from './pages/buyer-dashboard';
@@ -58,6 +59,7 @@ export default function App() {
                 </Route>
 
                 <Route path="/listings/:id" element={<ListingDetail />} />
+                <Route path="/farmer/:id" element={<FarmerProfile />} />
                 <Route path="/negotiate/:orderId" element={<Negotiate />} />
                 <Route path="/review/:orderId" element={<ReviewPage />} />
                 <Route path="/add-product" element={<AddProduct />} />

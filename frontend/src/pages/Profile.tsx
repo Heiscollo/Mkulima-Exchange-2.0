@@ -1,15 +1,42 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight, Edit3, Heart, LogOut, MapPin, Package, Phone, Settings, ShieldCheck } from 'lucide-react';
+import { Camera, ChevronRight, Heart, LogOut, MapPin, Package, Phone, Settings, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar } from '../components/ui/Avatar';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { reviewApi } from '../services/api';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 export function Profile() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const initials = (user?.name || 'U')
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handlePhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    try {
+      const response = await reviewApi.updateOwnProfile({ avatar: file });
+      updateUser({ avatarUrl: response.data.avatarUrl });
+      notifySuccess('Photo updated', 'Your profile photo has been updated.');
+    } catch (error: any) {
+      notifyError('Upload failed', error?.response?.data?.error || 'Could not upload photo.');
+    } finally {
+      setUploadingPhoto(false);
+      event.target.value = '';
+    }
+  };
 
   const menuItems = useMemo(
     () => [
@@ -48,17 +75,34 @@ export function Profile() {
 
           <div className="relative z-10 mt-24 flex flex-col items-center gap-6 text-center sm:flex-row sm:items-end sm:gap-8 sm:text-left">
             <div className="relative">
-              <div className="h-32 w-32 overflow-hidden rounded-[32px] border-4 border-white bg-white shadow-xl">
-                <Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="lg" />
+              <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#008D41] shadow-xl">
+                {user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user?.name || 'Profile photo'}
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="text-4xl font-black text-white">{initials}</span>
+                )}
               </div>
               <button
                 type="button"
-                onClick={() => navigate('/edit-profile')}
-                className="absolute -bottom-2 -right-2 rounded-xl border border-[#F4ECE1] bg-white p-2.5 text-[#2B1612] shadow-lg transition-colors hover:text-[#008D41]"
-                aria-label={t('profile.edit')}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="absolute -bottom-2 -right-2 rounded-xl border border-[#F4ECE1] bg-white p-2.5 text-[#2B1612] shadow-lg transition-colors hover:text-[#008D41] disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Edit photo"
               >
-                <Edit3 size={18} />
+                <Camera size={18} />
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
             </div>
 
             <div className="flex-1 pb-2">

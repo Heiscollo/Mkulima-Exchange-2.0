@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, ShoppingCart, User } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { listingApi, orderApi, type Listing } from '../services/api';
 import { formatKES } from '../utils/marketplace';
 import { notifyError, notifySuccess } from '../utils/notify';
@@ -71,6 +71,14 @@ export function ListingDetail() {
             <div><span className="font-bold">Quantity:</span> {listing.quantity}</div>
             <div><span className="font-bold">Available:</span> {listing.availableDate}</div>
           </div>
+          {listing.farmer ? (
+            <div className="mt-4 flex items-center justify-between rounded-[24px] border border-[#F4ECE1] bg-[#FDFBF7] p-4">
+              <p className="text-sm text-[#2B1612]/70"><span className="font-bold">Farmer:</span> {listing.farmer.name}</p>
+              <Link to={`/farmer/${listing.farmer.id}`} className="inline-flex items-center gap-2 rounded-xl bg-[#008D41]/10 px-4 py-2 text-sm font-bold text-[#008D41] hover:bg-[#008D41]/20">
+                <User size={16} /> View farmer profile
+              </Link>
+            </div>
+          ) : null}
           <div className="mt-6 flex items-end gap-4">
             <label className="flex-1">
               <span className="mb-2 block text-sm font-bold text-[#2B1612]">Quantity</span>

@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { errorResponse, successResponse } from '../utils/helpers.js';
 import { isValidKenyaPhone, normalizePhone } from '../utils/phone.js';
+import { uploadImage } from '../utils/cloudinary.js';
 
 const prisma = new PrismaClient();
 
@@ -30,6 +31,7 @@ const buildPublicProfile = (user, averageRating, completedTransactions) => {
     role: user.role,
     county: user.county,
     isVerified: user.isVerified,
+    avatarUrl: user.avatarUrl,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     averageRating,
@@ -205,6 +207,14 @@ export const updateOwnProfile = async (req, res) => {
         return errorResponse(res, 400, 'Invalid M-Pesa number');
       }
       userUpdateData.mpesaNumber = normalizedMpesaNumber;
+    }
+
+    if (req.file) {
+      const uploadResult = await uploadImage(req.file.path, 'avatars');
+      if (!uploadResult.success) {
+        return errorResponse(res, 500, 'Failed to upload photo: ' + uploadResult.error);
+      }
+      userUpdateData.avatarUrl = uploadResult.url;
     }
 
     if (!Object.keys(userUpdateData).length && !hasProfileSpecificUpdates) {

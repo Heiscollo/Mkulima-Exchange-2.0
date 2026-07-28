@@ -9,7 +9,6 @@ export function Settings() {
   const { t, language, setLanguage } = useLanguage();
   const [settings, setSettings] = useState({
     notifications: true,
-    emailUpdates: true,
     orderUpdates: true,
     twoFactor: false,
     privateProfile: false,
@@ -28,12 +27,6 @@ export function Settings() {
       icon: Bell,
       title: 'Push Notifications',
       description: 'Receive notifications about orders and updates',
-    },
-    {
-      key: 'emailUpdates' as const,
-      icon: Bell,
-      title: 'Email Updates',
-      description: 'Receive email updates about new products',
     },
     {
       key: 'orderUpdates' as const,

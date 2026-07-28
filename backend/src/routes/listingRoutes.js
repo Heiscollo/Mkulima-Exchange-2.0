@@ -128,6 +128,9 @@ router.get(
     query('county')
       .trim()
       .optional(),
+    query('farmer_id')
+      .trim()
+      .optional(),
     query('min_price')
       .optional()
       .isFloat({ min: 0 })

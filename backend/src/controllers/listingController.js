@@ -135,6 +135,7 @@ export const getAllListings = async (req, res) => {
       county,
       min_price,
       max_price,
+      farmer_id,
       page = 1,
       limit = 20,
     } = req.query;
@@ -143,6 +144,10 @@ export const getAllListings = async (req, res) => {
     const where = {
       status: 'ACTIVE', // Only show active listings
     };
+
+    if (farmer_id) {
+      where.farmerId = farmer_id;
+    }
 
     if (crop_name) {
       where.cropName = {
