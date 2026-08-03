@@ -81,14 +81,14 @@ export function Navbar() {
             <button
               onClick={toggleTheme}
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="p-2.5 text-[#2B1612]/70 dark:text-[#F4ECE1]/70 hover:text-[#008D41] hover:bg-[#F4ECE1] dark:hover:bg-[#2C211D] rounded-xl transition-all"
+              className="cursor-pointer p-2.5 text-[#2B1612]/70 dark:text-[#F4ECE1]/70 hover:text-[#008D41] hover:bg-[#F4ECE1] dark:hover:bg-[#2C211D] rounded-xl transition-all"
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
             <button
               onClick={toggleLanguage}
-              className="px-3 py-1.5 text-xs font-black uppercase text-[#008D41] bg-[#008D41]/10 hover:bg-[#008D41]/20 rounded-lg transition-all border border-[#008D41]/20"
+              className="cursor-pointer px-3 py-1.5 text-xs font-black uppercase text-[#008D41] bg-[#008D41]/10 hover:bg-[#008D41]/20 rounded-lg transition-all border border-[#008D41]/20"
             >
               {language === 'en' ? 'SW' : 'EN'}
             </button>
@@ -104,7 +104,7 @@ export function Navbar() {
               <Avatar name={user?.name} avatarUrl={user?.avatarUrl} size="md" />
               <span className="text-sm font-bold text-[#2B1612] dark:text-[#F4ECE1] hidden sm:block">{user?.name || 'User'}</span>
             </Link>
-            <button className="md:hidden p-2.5 text-[#2B1612] dark:text-[#F4ECE1] bg-[#F4ECE1] dark:bg-[#2C211D] rounded-xl ml-2">
+            <button className="cursor-pointer md:hidden p-2.5 text-[#2B1612] dark:text-[#F4ECE1] bg-[#F4ECE1] dark:bg-[#2C211D] rounded-xl ml-2">
               <Menu size={24} />
             </button>
           </div>

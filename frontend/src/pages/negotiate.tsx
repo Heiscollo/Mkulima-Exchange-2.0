@@ -93,7 +93,7 @@ export function Negotiate() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]"><ArrowLeft size={18} /> Back</button>
+      <button onClick={() => navigate(-1)} className="mb-6 inline-flex cursor-pointer items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]"><ArrowLeft size={18} /> Back</button>
       <div className="rounded-[32px] border border-[#F4ECE1] bg-white p-6 shadow-sm md:p-8">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-[#008D41]">Negotiation</p>
         <h1 className="mt-3 text-3xl font-black text-[#2B1612]">Order {order.id}</h1>
@@ -108,13 +108,13 @@ export function Negotiate() {
             <span className="mb-2 block text-sm font-bold text-[#2B1612]">Counter price per unit</span>
             <input value={counterPrice} onChange={(e) => setCounterPrice(e.target.value)} type="number" min="1" className="h-14 w-full rounded-2xl border-2 border-[#F4ECE1] bg-[#FDFBF7] px-4 outline-none" placeholder="Enter your offer" />
           </label>
-          <button onClick={handleSendCounter} disabled={saving} className="self-end rounded-2xl bg-gradient-kenya px-5 py-4 font-black text-white disabled:cursor-not-allowed disabled:opacity-70">
+          <button onClick={handleSendCounter} disabled={saving} className="self-end cursor-pointer rounded-2xl bg-gradient-kenya px-5 py-4 font-black text-white disabled:cursor-not-allowed disabled:opacity-70">
             <MessageSquare size={16} className="mr-2 inline" /> {isFarmerOnOrder ? 'Send counter offer' : 'Send counter'}
           </button>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <button onClick={handleAccept} disabled={saving} className="inline-flex items-center gap-2 rounded-2xl bg-[#008D41]/10 px-5 py-3 font-black text-[#008D41] disabled:opacity-70"><CheckCircle2 size={16} /> {isFarmerOnOrder ? 'Accept order' : 'Accept counter'}</button>
-          <button onClick={handleReject} disabled={saving} className="inline-flex items-center gap-2 rounded-2xl bg-[#E32636]/10 px-5 py-3 font-black text-[#E32636] disabled:opacity-70"><X size={16} /> {isFarmerOnOrder ? 'Reject order' : 'Reject counter'}</button>
+          <button onClick={handleAccept} disabled={saving} className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-[#008D41]/10 px-5 py-3 font-black text-[#008D41] disabled:opacity-70"><CheckCircle2 size={16} /> {isFarmerOnOrder ? 'Accept order' : 'Accept counter'}</button>
+          <button onClick={handleReject} disabled={saving} className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-[#E32636]/10 px-5 py-3 font-black text-[#E32636] disabled:opacity-70"><X size={16} /> {isFarmerOnOrder ? 'Reject order' : 'Reject counter'}</button>
         </div>
       </div>
     </div>

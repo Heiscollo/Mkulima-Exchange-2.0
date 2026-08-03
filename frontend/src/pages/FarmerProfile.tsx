@@ -35,7 +35,37 @@ export function FarmerProfile() {
   }, [id]);
 
   if (loading) {
-    return <div className="mx-auto max-w-5xl px-4 py-16 text-center text-[#2B1612]/60">Loading profile...</div>;
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-2 h-2 bg-[#008D41] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="w-2 h-2 bg-[#008D41] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="w-2 h-2 bg-[#008D41] rounded-full animate-bounce"></div>
+          <span className="text-sm font-medium text-[#008D41] ml-1">Loading profile...</span>
+        </div>
+
+        <div className="rounded-[40px] border border-[#F4ECE1] bg-white p-6 shadow-xl shadow-[#008D41]/5 sm:p-10">
+          <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
+            <div className="h-28 w-28 flex-shrink-0 animate-pulse rounded-full bg-gray-200" />
+            <div className="flex-1 space-y-3">
+              <div className="mx-auto h-7 w-48 animate-pulse rounded bg-gray-200 sm:mx-0" />
+              <div className="mx-auto h-4 w-32 animate-pulse rounded bg-gray-200 sm:mx-0" />
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="h-20 animate-pulse rounded-[24px] bg-gray-200" />
+            <div className="h-20 animate-pulse rounded-[24px] bg-gray-200" />
+            <div className="col-span-2 h-20 animate-pulse rounded-[24px] bg-gray-200 sm:col-span-1" />
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
+          <div className="mt-6 h-64 w-full animate-pulse rounded-[28px] bg-gray-200" />
+        </div>
+      </div>
+    );
   }
 
   if (!profile) {
@@ -53,7 +83,7 @@ export function FarmerProfile() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]">
+      <button onClick={() => navigate(-1)} className="mb-6 inline-flex cursor-pointer items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]">
         <ArrowLeft size={18} /> Back
       </button>
 

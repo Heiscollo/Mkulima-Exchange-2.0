@@ -60,7 +60,7 @@ export function Settings() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate('/profile')}
-            className="p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
+            className="cursor-pointer p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
           >
             <ArrowLeft size={24} />
           </button>
@@ -73,7 +73,7 @@ export function Settings() {
           <div className="flex gap-4">
             <button
               onClick={() => setLanguage('en')}
-              className={`flex-1 px-6 py-3 rounded-xl font-bold transition-all ${
+              className={`flex-1 cursor-pointer px-6 py-3 rounded-xl font-bold transition-all ${
                 language === 'en'
                   ? 'bg-gradient-kenya text-white'
                   : 'border-2 border-[#F4ECE1] text-[#2B1612] hover:border-[#008D41]'
@@ -83,7 +83,7 @@ export function Settings() {
             </button>
             <button
               onClick={() => setLanguage('sw')}
-              className={`flex-1 px-6 py-3 rounded-xl font-bold transition-all ${
+              className={`flex-1 cursor-pointer px-6 py-3 rounded-xl font-bold transition-all ${
                 language === 'sw'
                   ? 'bg-gradient-kenya text-white'
                   : 'border-2 border-[#F4ECE1] text-[#2B1612] hover:border-[#008D41]'
@@ -114,7 +114,7 @@ export function Settings() {
                 </div>
                 <button
                   onClick={() => handleToggle(key)}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                  className={`cursor-pointer px-4 py-2 rounded-lg font-bold transition-all ${
                     settings[key]
                       ? 'bg-[#008D41] text-white'
                       : 'bg-[#F4ECE1] text-[#2B1612]'
@@ -130,7 +130,7 @@ export function Settings() {
         {/* Danger Zone */}
         <div className="rounded-[32px] bg-red-50 shadow-sm border border-red-200 p-8">
           <h2 className="text-lg font-bold text-red-600 mb-6">Danger Zone</h2>
-          <button className="w-full px-6 py-3 border-2 border-red-600 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all">
+          <button className="w-full cursor-pointer px-6 py-3 border-2 border-red-600 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all">
             Delete Account
           </button>
           <p className="text-xs text-red-600/70 mt-3">

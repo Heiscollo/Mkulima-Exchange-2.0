@@ -62,10 +62,10 @@ export function Orders() {
           <p className="mt-2 text-lg font-medium text-[#2B1612]/60">Negotiation, escrow, and delivery status in one place.</p>
 
           <div className="mt-8 flex max-w-sm rounded-[20px] bg-[#F4ECE1] p-1.5 shadow-inner">
-            <button onClick={() => setActiveTab('active')} className={`flex-1 rounded-[16px] py-3 text-sm font-bold transition-all ${activeTab === 'active' ? 'bg-white text-[#008D41] shadow-sm' : 'text-[#2B1612]/60 hover:text-[#2B1612]'}`}>
+            <button onClick={() => setActiveTab('active')} className={`flex-1 cursor-pointer rounded-[16px] py-3 text-sm font-bold transition-all ${activeTab === 'active' ? 'bg-white text-[#008D41] shadow-sm' : 'text-[#2B1612]/60 hover:text-[#2B1612]'}`}>
               Active
             </button>
-            <button onClick={() => setActiveTab('past')} className={`flex-1 rounded-[16px] py-3 text-sm font-bold transition-all ${activeTab === 'past' ? 'bg-white text-[#008D41] shadow-sm' : 'text-[#2B1612]/60 hover:text-[#2B1612]'}`}>
+            <button onClick={() => setActiveTab('past')} className={`flex-1 cursor-pointer rounded-[16px] py-3 text-sm font-bold transition-all ${activeTab === 'past' ? 'bg-white text-[#008D41] shadow-sm' : 'text-[#2B1612]/60 hover:text-[#2B1612]'}`}>
               Past
             </button>
           </div>
@@ -115,15 +115,15 @@ export function Orders() {
 
                       <div className="flex flex-wrap gap-3">
                         {(!['COMPLETED', 'REFUNDED', 'REJECTED'].includes(order.status)) ? (
-                          <button onClick={() => navigate(`/negotiate/${order.id}`)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#F4ECE1] px-5 py-4 text-sm font-bold text-[#2B1612] transition-colors hover:bg-gradient-kenya hover:text-white">
+                          <button onClick={() => navigate(`/negotiate/${order.id}`)} className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#F4ECE1] px-5 py-4 text-sm font-bold text-[#2B1612] transition-colors hover:bg-gradient-kenya hover:text-white">
                             Negotiate <ChevronRight size={18} />
                           </button>
                         ) : null}
                         {isBuyer && order.status === 'ACCEPTED' ? (
-                          <button onClick={() => handlePayment(order.id)} className="rounded-2xl bg-gradient-kenya px-5 py-4 text-sm font-black text-white">Pay now</button>
+                          <button onClick={() => handlePayment(order.id)} className="cursor-pointer rounded-2xl bg-gradient-kenya px-5 py-4 text-sm font-black text-white">Pay now</button>
                         ) : null}
                         {order.status === 'COMPLETED' ? (
-                          <button onClick={() => navigate(`/review/${order.id}`)} className="rounded-2xl bg-[#008D41]/10 px-5 py-4 text-sm font-black text-[#008D41]">Leave review</button>
+                          <button onClick={() => navigate(`/review/${order.id}`)} className="cursor-pointer rounded-2xl bg-[#008D41]/10 px-5 py-4 text-sm font-black text-[#008D41]">Leave review</button>
                         ) : null}
                         {order.status === 'DISPUTED' ? (
                           <span className="inline-flex items-center gap-2 rounded-2xl bg-[#E32636]/10 px-5 py-4 text-sm font-black text-[#E32636]"><ShieldAlert size={16} /> Under review</span>

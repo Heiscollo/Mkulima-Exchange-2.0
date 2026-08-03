@@ -57,15 +57,15 @@ export function Onboarding() {
           <span className="text-2xl font-black text-white tracking-tight drop-shadow-md">Mkulima Exchange</span>
         </div>
         <div className="flex gap-4 items-center">
-          <button 
+          <button
             onClick={toggleLanguage}
-            className="px-3 py-1.5 text-xs font-black uppercase text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all border border-white/20"
+            className="cursor-pointer px-3 py-1.5 text-xs font-black uppercase text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all border border-white/20"
           >
             {language === 'en' ? 'SW' : 'EN'}
           </button>
-          <button 
+          <button
             onClick={() => navigate('/login')}
-            className="rounded-[16px] px-8 py-3 text-sm font-bold text-white transition-colors hover:bg-white/20 border border-white/30 backdrop-blur-md"
+            className="cursor-pointer rounded-[16px] px-8 py-3 text-sm font-bold text-white transition-colors hover:bg-white/20 border border-white/30 backdrop-blur-md"
           >
             {t('onboarding.login')}
           </button>
@@ -109,14 +109,14 @@ export function Onboarding() {
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
           <button
-            onClick={() => navigate('/register')} 
-            className="rounded-[20px] bg-gradient-kenya px-10 py-5 text-lg font-black text-white shadow-xl shadow-[#008D41]/30 transition-transform hover:scale-105 w-full sm:w-auto text-center"
+            onClick={() => navigate('/register')}
+            className="cursor-pointer rounded-[20px] bg-gradient-kenya px-10 py-5 text-lg font-black text-white shadow-xl shadow-[#008D41]/30 transition-transform hover:scale-105 w-full sm:w-auto text-center"
           >
             {t('onboarding.getStarted')}
           </button>
-          <button 
+          <button
             onClick={() => navigate('/home')}
-            className="rounded-[20px] border border-white/40 bg-white/10 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white w-full sm:w-auto text-center"
+            className="cursor-pointer rounded-[20px] border border-white/40 bg-white/10 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white w-full sm:w-auto text-center"
           >
             {t('onboarding.explore')}
           </button>
@@ -127,7 +127,7 @@ export function Onboarding() {
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`h-2 rounded-full transition-all duration-500 ease-out ${
+              className={`h-2 cursor-pointer rounded-full transition-all duration-500 ease-out ${
                 index === currentSlide ? "w-16 bg-[#FFD200] shadow-[0_0_10px_rgba(255,210,0,0.5)]" : "w-4 bg-white/40 hover:bg-white/60"
               }`}
             />

@@ -60,8 +60,8 @@ export function Payments() {
                   <p className="mt-1 text-[#2B1612]/60">{formatKES(order.totalPrice)}</p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-3 md:mt-0">
-                  <button onClick={() => startPayment(order.id)} className="inline-flex items-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-3 font-black text-white"><CreditCard size={16} /> Pay</button>
-                  <button onClick={() => confirmDelivery(order.id)} className="inline-flex items-center gap-2 rounded-2xl bg-[#008D41]/10 px-5 py-3 font-black text-[#008D41]">Confirm delivery</button>
+                  <button onClick={() => startPayment(order.id)} className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-3 font-black text-white"><CreditCard size={16} /> Pay</button>
+                  <button onClick={() => confirmDelivery(order.id)} className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-[#008D41]/10 px-5 py-3 font-black text-[#008D41]">Confirm delivery</button>
                 </div>
               </div>
             ))}

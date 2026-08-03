@@ -52,7 +52,7 @@ export function EditProfile() {
       <div className="mx-auto max-w-2xl px-4 pt-12 sm:px-6 lg:px-8">
         <button
           onClick={() => navigate('/profile')}
-          className="mb-6 inline-flex items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]"
+          className="mb-6 inline-flex cursor-pointer items-center gap-2 font-bold text-[#2B1612] hover:text-[#008D41]"
         >
           <ArrowLeft size={20} /> Back
         </button>
@@ -109,14 +109,14 @@ export function EditProfile() {
               <button
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="flex-1 px-6 py-3 rounded-xl border-2 border-[#2B1612]/20 text-[#2B1612] font-bold hover:bg-[#F4ECE1] transition-all"
+                className="flex-1 cursor-pointer px-6 py-3 rounded-xl border-2 border-[#2B1612]/20 text-[#2B1612] font-bold hover:bg-[#F4ECE1] transition-all"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-kenya text-white font-bold disabled:opacity-70 transition-all"
+                className="flex-1 flex cursor-pointer items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-kenya text-white font-bold disabled:opacity-70 transition-all"
               >
                 <Save size={20} />
                 {isSaving ? 'Saving...' : 'Save changes'}

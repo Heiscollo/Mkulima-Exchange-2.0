@@ -77,7 +77,7 @@ export function Home() {
             <p className="text-sm text-[#2B1612]/60">{displayedListings.length} active opportunities nearby</p>
           </div>
           {isFarmer ? (
-            <button onClick={() => navigate('/add-product')} className="inline-flex items-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-3 text-sm font-black text-white shadow-lg shadow-[#008D41]/30">
+            <button onClick={() => navigate('/add-product')} className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-3 text-sm font-black text-white shadow-lg shadow-[#008D41]/30">
               <Plus size={18} /> Add listing
             </button>
           ) : null}

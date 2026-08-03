@@ -127,10 +127,10 @@ export function Register() {
                 <Input icon={<User size={18} />} value={name} onChange={(e) => setName(e.target.value)} placeholder="Jina kamili" required className="bg-white lg:bg-[#FDFBF7] dark:lg:bg-[#1D1512]" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setRole('FARMER')} className={`rounded-2xl px-4 py-4 text-sm font-black ${role === 'FARMER' ? 'bg-gradient-kenya text-white' : 'border border-[#F4ECE1] dark:border-[#3A2B26] bg-white dark:bg-[#221917] text-[#2B1612] dark:text-[#F4ECE1]'}`}>
+                <button type="button" onClick={() => setRole('FARMER')} className={`cursor-pointer rounded-2xl px-4 py-4 text-sm font-black ${role === 'FARMER' ? 'bg-gradient-kenya text-white' : 'border border-[#F4ECE1] dark:border-[#3A2B26] bg-white dark:bg-[#221917] text-[#2B1612] dark:text-[#F4ECE1]'}`}>
                   <div className="flex items-center justify-center gap-2"><Tractor size={16} /> FARMER</div>
                 </button>
-                <button type="button" onClick={() => setRole('BUYER')} className={`rounded-2xl px-4 py-4 text-sm font-black ${role === 'BUYER' ? 'bg-gradient-kenya text-white' : 'border border-[#F4ECE1] dark:border-[#3A2B26] bg-white dark:bg-[#221917] text-[#2B1612] dark:text-[#F4ECE1]'}`}>
+                <button type="button" onClick={() => setRole('BUYER')} className={`cursor-pointer rounded-2xl px-4 py-4 text-sm font-black ${role === 'BUYER' ? 'bg-gradient-kenya text-white' : 'border border-[#F4ECE1] dark:border-[#3A2B26] bg-white dark:bg-[#221917] text-[#2B1612] dark:text-[#F4ECE1]'}`}>
                   <div className="flex items-center justify-center gap-2"><MapPin size={16} /> BUYER</div>
                 </button>
               </div>
@@ -139,7 +139,7 @@ export function Register() {
                 <label className="mb-2 ml-1 block text-sm font-bold text-white lg:text-[#2B1612] dark:lg:text-[#F4ECE1]">M-Pesa number</label>
                 <Input icon={<Phone size={18} />} value={mpesaNumber} onChange={(e) => { setMpesaNumber(e.target.value); setPhone(e.target.value); }} placeholder="0712 345 678" className="bg-white lg:bg-[#FDFBF7] dark:lg:bg-[#1D1512]" />
               </div>
-              <button disabled={isLoading} type="submit" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-base font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70">
+              <button disabled={isLoading} type="submit" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-base font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70">
                 {isLoading ? 'Saving...' : 'Save profile'} {!isLoading && <ArrowRight size={18} />}
               </button>
             </form>

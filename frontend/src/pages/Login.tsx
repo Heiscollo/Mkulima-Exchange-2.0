@@ -110,7 +110,7 @@ export function Login() {
               <button
                 disabled={loading}
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-base font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-base font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? 'Please wait...' : step === 'phone' ? 'Send OTP' : 'Verify OTP'} {!loading && <ArrowRight size={18} />}
               </button>

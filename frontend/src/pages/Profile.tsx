@@ -91,7 +91,7 @@ export function Profile() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute -bottom-2 -right-2 rounded-xl border border-[#F4ECE1] bg-white p-2.5 text-[#2B1612] shadow-lg transition-colors hover:text-[#008D41] disabled:cursor-not-allowed disabled:opacity-60"
+                className="absolute -bottom-2 -right-2 cursor-pointer rounded-xl border border-[#F4ECE1] bg-white p-2.5 text-[#2B1612] shadow-lg transition-colors hover:text-[#008D41] disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Edit photo"
               >
                 <Camera size={18} />
@@ -123,7 +123,7 @@ export function Profile() {
             <button
               type="button"
               onClick={() => navigate('/edit-profile')}
-              className="mb-2 rounded-xl border-2 border-[#008D41] px-6 py-3 font-bold text-[#008D41] shadow-sm transition-all hover:bg-[#008D41] hover:text-white"
+              className="mb-2 cursor-pointer rounded-xl border-2 border-[#008D41] px-6 py-3 font-bold text-[#008D41] shadow-sm transition-all hover:bg-[#008D41] hover:text-white"
             >
               {t('profile.edit')}
             </button>
@@ -167,7 +167,7 @@ export function Profile() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-[24px] border border-[#F4ECE1] bg-white px-5 py-4 font-black text-[#E32636] shadow-sm transition-colors hover:bg-[#E32636]/5"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[24px] border border-[#F4ECE1] bg-white px-5 py-4 font-black text-[#E32636] shadow-sm transition-colors hover:bg-[#E32636]/5"
             >
               <LogOut size={18} />
               {t('profile.logout')}

@@ -60,7 +60,7 @@ export function Search() {
             </label>
             <CountySelect value={county} onChange={(e) => setCounty(e.target.value)} className="bg-white text-[#2B1612]" label="County" />
             <CropCategorySelect value={category} onChange={(e) => setCategory(e.target.value)} className="bg-white text-[#2B1612]" label="Category" />
-            <button type="button" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-4 text-sm font-black text-[#008D41]">
+            <button type="button" className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white px-4 py-4 text-sm font-black text-[#008D41]">
               <Filter size={18} /> Filtered results
             </button>
           </div>

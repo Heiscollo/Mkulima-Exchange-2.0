@@ -42,7 +42,7 @@ export function ToastHost() {
                 <p className="text-sm font-bold">{toast.title}</p>
                 {toast.message ? <p className="mt-1 text-sm opacity-80">{toast.message}</p> : null}
               </div>
-              <button onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))} className="text-current/70 hover:text-current">
+              <button onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))} className="cursor-pointer text-current/70 hover:text-current">
                 <X size={16} />
               </button>
             </div>

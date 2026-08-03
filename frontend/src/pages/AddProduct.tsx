@@ -32,7 +32,7 @@ export function AddProduct() {
         <div className="rounded-[28px] border border-[#F4ECE1] bg-white p-10 shadow-sm">
           <h1 className="text-3xl font-black text-[#2B1612]">Farmers only</h1>
           <p className="mt-3 text-[#2B1612]/60">Creating listings is reserved for farmer accounts.</p>
-          <button onClick={() => navigate('/home')} className="mt-6 rounded-2xl bg-gradient-kenya px-6 py-3 font-black text-white">Go home</button>
+          <button onClick={() => navigate('/home')} className="mt-6 cursor-pointer rounded-2xl bg-gradient-kenya px-6 py-3 font-black text-white">Go home</button>
         </div>
       </div>
     );
@@ -75,7 +75,7 @@ export function AddProduct() {
             <h1 className="text-4xl font-black tracking-tight text-[#2B1612]">Add listing</h1>
             <p className="mt-2 text-[#2B1612]/60">Upload photos, set price, and publish directly to farmers' market.</p>
           </div>
-          <button onClick={() => navigate('/home')} className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F4ECE1] bg-white text-[#2B1612]">
+          <button onClick={() => navigate('/home')} className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl border border-[#F4ECE1] bg-white text-[#2B1612]">
             <X size={24} />
           </button>
         </div>
@@ -134,7 +134,7 @@ export function AddProduct() {
               <label className="mb-2 ml-1 block text-sm font-bold text-[#2B1612]">Description</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full rounded-[24px] border-2 border-[#F4ECE1] bg-[#FDFBF7] p-4 outline-none" placeholder="Describe freshness, quality, farming method, delivery info..." />
             </div>
-            <button disabled={isLoading} type="submit" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-lg font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70">
+            <button disabled={isLoading} type="submit" className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-kenya px-5 py-4 text-lg font-black text-white shadow-lg shadow-[#008D41]/30 disabled:cursor-not-allowed disabled:opacity-70">
               {isLoading ? 'Publishing...' : 'Publish listing'} {!isLoading && <ArrowRight size={18} />}
             </button>
           </form>

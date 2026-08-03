@@ -45,7 +45,7 @@ export function ProductCard({ id, _id, title, name, price, farmer, farmerId, ima
               <span className="text-[#F7971E] mr-1">★</span> {rating}
             </span>
           </div>
-          <button className="rounded-xl bg-white/20 p-2.5 backdrop-blur-md transition-colors hover:bg-[#E32636] hover:text-white border border-white/30 text-white shadow-sm">
+          <button className="cursor-pointer rounded-xl bg-white/20 p-2.5 backdrop-blur-md transition-colors hover:bg-[#E32636] hover:text-white border border-white/30 text-white shadow-sm">
             <Heart size={18} />
           </button>
         </div>
@@ -63,7 +63,7 @@ export function ProductCard({ id, _id, title, name, price, farmer, farmerId, ima
             <span className="text-[10px] font-bold text-[#2B1612]/50 uppercase tracking-wider">{t('home.price')}</span>
             <span className="text-xl font-black text-[#008D41] tracking-tight">{displayPrice}</span>
           </div>
-          <button className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#F4ECE1] text-[#2B1612] transition-colors hover:bg-gradient-kenya hover:text-white shadow-sm">
+          <button className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-[14px] bg-[#F4ECE1] text-[#2B1612] transition-colors hover:bg-gradient-kenya hover:text-white shadow-sm">
             <Plus size={24} />
           </button>
         </div>

@@ -48,7 +48,7 @@ export function Saved() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate('/profile')}
-            className="p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
+            className="cursor-pointer p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
           >
             <ArrowLeft size={24} />
           </button>
@@ -73,7 +73,7 @@ export function Saved() {
                   />
                   <button
                     onClick={() => handleRemove(item.id)}
-                    className="absolute top-3 right-3 p-2.5 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
+                    className="absolute top-3 right-3 cursor-pointer p-2.5 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
                   >
                     <Trash2 size={18} className="text-red-600" />
                   </button>
@@ -83,7 +83,7 @@ export function Saved() {
                   <p className="text-sm text-[#2B1612]/60 mb-3">{item.seller}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-black text-[#008D41]">KSh {item.price}</span>
-                    <button className="px-4 py-2 bg-gradient-kenya text-white rounded-lg font-bold hover:scale-105 transition-transform">
+                    <button className="cursor-pointer px-4 py-2 bg-gradient-kenya text-white rounded-lg font-bold hover:scale-105 transition-transform">
                       Add to Cart
                     </button>
                   </div>

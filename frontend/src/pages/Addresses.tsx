@@ -71,7 +71,7 @@ export function Addresses() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/profile')}
-              className="p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
+              className="cursor-pointer p-2.5 hover:bg-[#F4ECE1] rounded-xl transition-colors text-[#2B1612]"
             >
               <ArrowLeft size={24} />
             </button>
@@ -79,7 +79,7 @@ export function Addresses() {
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-kenya text-white rounded-xl font-bold hover:scale-105 transition-transform"
+            className="flex cursor-pointer items-center gap-2 px-4 py-2.5 bg-gradient-kenya text-white rounded-xl font-bold hover:scale-105 transition-transform"
           >
             <Plus size={20} /> Add Address
           </button>
@@ -121,13 +121,13 @@ export function Addresses() {
               <div className="flex gap-3">
                 <button
                   onClick={handleAddAddress}
-                  className="flex-1 px-4 py-3 bg-gradient-kenya text-white rounded-xl font-bold hover:scale-105 transition-transform"
+                  className="flex-1 cursor-pointer px-4 py-3 bg-gradient-kenya text-white rounded-xl font-bold hover:scale-105 transition-transform"
                 >
                   Save Address
                 </button>
                 <button
                   onClick={() => setShowForm(false)}
-                  className="flex-1 px-4 py-3 border-2 border-[#2B1612]/20 text-[#2B1612] rounded-xl font-bold hover:bg-[#F4ECE1] transition-all"
+                  className="flex-1 cursor-pointer px-4 py-3 border-2 border-[#2B1612]/20 text-[#2B1612] rounded-xl font-bold hover:bg-[#F4ECE1] transition-all"
                 >
                   Cancel
                 </button>
@@ -162,14 +162,14 @@ export function Addresses() {
                   {!address.isDefault && (
                     <button
                       onClick={() => handleSetDefault(address.id)}
-                      className="px-3 py-2 text-xs font-bold text-[#008D41] bg-[#008D41]/10 rounded-lg hover:bg-[#008D41] hover:text-white transition-colors"
+                      className="cursor-pointer px-3 py-2 text-xs font-bold text-[#008D41] bg-[#008D41]/10 rounded-lg hover:bg-[#008D41] hover:text-white transition-colors"
                     >
                       Set Default
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(address.id)}
-                    className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="cursor-pointer p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
